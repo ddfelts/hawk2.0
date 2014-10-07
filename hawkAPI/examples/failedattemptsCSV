@@ -1,0 +1,58 @@
+#!/usr/bin/python
+from hawkAPI.lib.core.hawkcore import hawkcore
+from hawkAPI.lib.core.hawkapi import hawkapi
+from hawkAPI.lib.core.hawklib import hawklib
+from hawkAPI.lib.plugins.hawkCSV import hawkCSV
+from datetime import datetime
+from operator import itemgetter
+import inspect
+import sys
+from optparse import OptionParser
+
+usage = 'failedattemptsCSV -u "id" -p "pass" -i "server" -c "client" -s start -e end -l directory -t type'
+parser = OptionParser(usage=usage)
+parser.add_option("-u",dest="user",help="Username")
+parser.add_option("-p",dest="passw",help="Password")
+parser.add_option("-i",dest="server",help="The hawk server IP")
+parser.add_option("-c",dest="client",help="Client name")
+parser.add_option("-d",dest="days",help="Number of Days")
+parser.add_option("-l",dest="dir",help="location to store")
+parser.add_option("-t",dest="type",help="(login or action)")
+parser.add_option("-s",dest="start",help="Start Date")
+parser.add_option("-e",dest="end",help="End Date")
+(opt,args) = parser.parse_args()
+if not opt.user:
+   parser.error("No User id provided")
+if not opt.passw:
+   parser.error("No Password provided")
+if not opt.server:
+   parser.error("Hawk IP address")
+if not opt.client:
+   parser.error("No Client Set")
+if not opt.start:
+   parser.error("No start time")
+if not opt.end:
+   parser.error("No end time")
+if not opt.dir:
+   parser.error("Directory to save files")
+if not opt.type:
+   opt.type = "login"
+hawk = hawkcore(opt.server)
+hawk.login(opt.user,opt.passw)
+res = hawkapi(hawk)
+lib = hawklib(hawk)
+dates = lib.getDates(str(opt.start),str(opt.end))
+c = []
+for i in dates:
+    start,end,idit = i
+    print "%s:%s --- %s" % (start,end,idit)
+    f = res.getFailedLoginsByGroup(start,end,opt.client,tp="login")
+    if not f:
+       pass
+    else:
+       for i in f:
+           c.append(i)
+c.sort(key=itemgetter('date_added'))
+csv = hawkCSV("%s/%s.csv" % (opt.dir,opt.client),hawk)
+csv.build(c)
+hawk.logout()
