@@ -32,7 +32,7 @@ hawk.login(opt.user,opt.passw)
 res = hawkapi(hawk)
 lib = hawklib(hawk)
 
-if opt.debug == 1:
+if opt.debug:
    hawk.debug()
 
 if opt.limit:
