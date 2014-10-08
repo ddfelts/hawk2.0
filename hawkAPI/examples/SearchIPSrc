@@ -1,0 +1,76 @@
+#!/usr/bin/python
+
+from hawkAPI.lib.core.hawkcore import hawkcore
+from hawkAPI.lib.core.hawkapi import hawkapi
+from hawkAPI.lib.core.hawklib import hawklib
+from operator import itemgetter
+import argparse
+import sys
+
+usage = 'SearchIPSrc -u uid -p pass -c hawkip -g client -s "start" -e "end" -i ipaddress -l limitofreturn'
+parser = argparse.ArgumentParser(description="Search by IP destination",epilog=usage)
+parser.add_argument("-u","--user",help="Username",type=str,required=True)
+parser.add_argument("-p","--passw",help="Password",type=str,required=True)
+parser.add_argument("-c","--server",help="The hawk server IP",type=str,required=True)
+parser.add_argument("-g","--client",help="Client name",type=str,required=True)
+parser.add_argument("-s","--start",help="Start Date of search",type=str,required=True)
+parser.add_argument("-e","--end",help="End Date of search",type=str,required=True)
+parser.add_argument("-i","--ip",help="IP address to search for",type=str,required=True)
+parser.add_argument("-l","--limit",help="Set Limit of return",type=int,required=False)
+parser.add_argument("-d","--debug",help="Set Debug on",action="store_true",required=False)
+parser.add_argument("-b","--convert",help="return from utc to localtime",action="store_true",required=False)
+
+if len(sys.argv) < 7:
+    parser.print_help()
+    sys.exit()
+opt = parser.parse_args()
+
+  
+hawk = hawkcore(opt.server)
+hawk.login(opt.user,opt.passw)
+res = hawkapi(hawk)
+lib = hawklib(hawk)
+
+if opt.debug == 1:
+   hawk.debug()
+
+if opt.limit:
+    data = res.searchIpSrcByGroup(lib.conDateToUtc(opt.start),lib.conDateToUtc(opt.end),opt.ip,opt.client,lm=opt.limit)
+else:
+  data = []
+  if opt.convert:
+     dates = lib.getDates(lib.conDateToUtc(opt.start),lib.conDateToUtc(opt.end))
+  for i in dates:
+      start,end,idit = i
+      f = res.searchIpSrcByGroup(start,end,opt.ip,opt.client) 
+      if not f:
+       pass
+      else:
+       for i in f:
+           data.append(i)
+data.sort(key=itemgetter('date_added'))
+table = [("Date","Resource","IP Src","IP Dst","AlertName","Client")]
+for i in data:
+    if "resource_name" not in i:
+        name = "None"
+    else:
+        name = i["resource_name"]
+    if opt.convert:
+       table.append((lib.conDateToLocal(i["date_added"]),name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"]))
+    else:
+       table.append((i["date_added"],name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"]))
+
+print " "
+print "|-------------------------------|"
+print "| Search for IP by Source       |"
+print "|-------------------------------|"
+if opt.convert:
+   print "**Time in date field set to localtime**"
+else:
+   print "**Time in date field are in UTC use -b to convert**"
+print "Group: %s" % unicode(opt.client)
+print "Start: %s  End: %s" %(opt.start,opt.end)
+print " "
+
+lib.print_table(table)
+hawk.logout()
