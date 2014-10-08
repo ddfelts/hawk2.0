@@ -27,7 +27,11 @@ if len(sys.argv) < 7:
     sys.exit()
 
 opt = parser.parse_args()
+
 hawk = hawkcore(opt.server)
+if opt.debug:
+    hawk.debug()
+
 hawk.login(opt.user,opt.passw)
 res = hawkapi(hawk)
 lib = hawklib(hawk)
