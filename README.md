@@ -7,7 +7,7 @@ You will need to install <a href="https://github.com/mikemaccana/python-docx">py
 
     $sudo pip install python-docx
 
-You will need to install <a href="https://xlsxwriter.readthedocs.org">Xlswriter</a>
+You will need to install <a href="https://xlsxwriter.readthedocs.org">Xlsxwriter</a>
   
     $sudo pip install XlsxWriter
 
