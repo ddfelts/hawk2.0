@@ -53,6 +53,20 @@ class hawklib():
                 self.hawk.callError('Wrong value for dtype in getDateUtc expected m or d or h or s',str(dtype))
                 sys.exit(1)
 
+        def conDateToUtc(self,date):
+              UTCOFF = datetime.utcnow() - datetime.now()
+              ndate = datetime.strptime(date,"%Y-%m-%d %H:%M:%S")
+              t = ndate + UTCOFF
+              f = t.replace(microsecond=0)
+              return f.strftime("%Y-%m-%d %H:%M:%S")
+
+	def conDateToLocal(self,date):
+            UTCOFF = datetime.utcnow() - datetime.now()
+            ndate = datetime.strptime(date,"%Y-%m-%d %H:%M:%S.%f")
+            t = ndate - UTCOFF
+            f = t.replace(microsecond=0)
+            return f.strftime("%Y-%m-%d %H:%M:%S")
+
 	def getDates(self,start,end):
     	      nstart = datetime.strptime(start,"%Y-%m-%d %H:%M:%S")
               nend = datetime.strptime(end,"%Y-%m-%d %H:%M:%S")
@@ -89,5 +103,17 @@ class hawklib():
                     else:
                        all.append(f)
              return all
+
+	def print_table(self,rows):
+          widths = [ len(max(columns, key=len)) for columns in zip(*rows) ]
+          header, data = rows[0], rows[1:]
+          print(
+                ' | '.join( format(title, "%ds" % width) for width, title in zip(widths, header) )
+          )
+          print( '-+-'.join( '-' * width for width in widths ) )
+          for row in data:
+             print(
+                   " | ".join( format(cdata, "%ds" % width) for width, cdata in zip(widths, row) )
+             )
 
 
