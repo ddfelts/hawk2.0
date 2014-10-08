@@ -61,5 +61,6 @@ You will also need the request module
 
       pip install requests
 
-Download or clone the repo.
+Download or clone the repo
+
       python setup.py install
