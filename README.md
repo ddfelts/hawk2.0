@@ -3,7 +3,7 @@ hawk2.0
 
 New Rewrite of HawkAPI
 
-Linux Install:
+<h2>Linux Install:</h2>
 
 You will need to install <a href="https://github.com/mikemaccana/python-docx">python-docx:</a>
 
@@ -25,7 +25,7 @@ Download or clone the repo.
 
     $sudo python setup.py install
 
-Windows Install:
+<h2>Windows Install:</h2>
 
 Install <ahref="https://www.python.org/downloads/windows/">Python2.7</a>
 
