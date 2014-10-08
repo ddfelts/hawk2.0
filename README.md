@@ -14,3 +14,9 @@ You will need to install python
 You will need to install reportlab
 
     $sudo apt-get install python-reportlab
+
+You will need to install PyGal and lxml for graphics
+
+    $sudo pip install pygal CairoSVG tinycss cssselct
+
+
