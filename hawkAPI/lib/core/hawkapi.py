@@ -9,6 +9,32 @@ class hawkapi():
               bdata = {"column[]":"uid"}
               return self.hawk.getUsers(ndata)
 
+      def getAuditByUser(self,user):
+          ndata = {"column[0]":"audit_id",
+                   "column[1]":"username",
+                   "column[2]":"group",
+                   "column[3]":"category",
+                   "column[4]":"method",
+                   "column[5]":"status",
+                   "column[6]":"action",
+                   "column[7]":"criteria",
+                   "column[8]":"date_added"
+                   "where[0]":"username = '%s'" % user}
+          return self.hawk.getAudit(ndata)
+
+      def getAuditByGropu(self,user):
+          ndata = {"column[0]":"audit_id",
+                   "column[1]":"username",
+                   "column[2]":"group",
+                   "column[3]":"category",
+                   "column[4]":"method",
+                   "column[5]":"status",
+                   "column[6]":"action",
+                   "column[7]":"criteria",
+                   "column[8]":"date_added"
+                   "where[0]":"username = '%s'" % user}
+          return self.hawk.getAudit(ndata)
+
       def getUsersByGroup(self,client):
           ndata = {"column[0]":"uid",
                    "column[1]":"username",
