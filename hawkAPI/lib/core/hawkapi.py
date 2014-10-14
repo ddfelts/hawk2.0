@@ -18,7 +18,7 @@ class hawkapi():
                    "column[5]":"status",
                    "column[6]":"action",
                    "column[7]":"criteria",
-                   "column[8]":"date_added"
+                   "column[8]":"date_added",
                    "where[0]":"username = '%s'" % user}
           if lm != 0:
              ndata.update({"limit":"%s" % lm})
@@ -26,7 +26,7 @@ class hawkapi():
              ndata.update({"where[1]":"date_added = '%s'" % da})
           return self.hawk.getAudit(ndata)
 
-      def getAuditByGropu(self,group,da=0,lm=0):
+      def getAuditByGroup(self,group,da=0,lm=0):
           ndata = {"column[0]":"audit_id",
                    "column[1]":"username",
                    "column[2]":"group",
@@ -35,7 +35,7 @@ class hawkapi():
                    "column[5]":"status",
                    "column[6]":"action",
                    "column[7]":"criteria",
-                   "column[8]":"date_added"
+                   "column[8]":"date_added",
                    "where[0]":"group = '%s'" % group}
           if lm != 0:
              ndata.update({"limit":"%s" % lm})
