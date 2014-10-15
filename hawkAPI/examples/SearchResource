@@ -7,7 +7,7 @@ from operator import itemgetter
 import argparse
 import sys
 
-usage = 'SearchIPDst -u uid -p pass -c hawkip -g client -s "start" -e "end" -i ipaddress -l limitofreturn'
+usage = 'SearchResource -u uid -p pass -c hawkip -g client -s "start" -e "end" -i resaddress -l limitofreturn'
 parser = argparse.ArgumentParser(description="Search by IP destination",epilog=usage)
 parser.add_argument("-u","--user",help="Username",type=str,required=True)
 parser.add_argument("-p","--passw",help="Password",type=str,required=True)
@@ -15,7 +15,7 @@ parser.add_argument("-c","--server",help="The hawk server IP",type=str,required=
 parser.add_argument("-g","--client",help="Client name",type=str,required=True)
 parser.add_argument("-s","--start",help="Start Date of search",type=str,required=True)
 parser.add_argument("-e","--end",help="End Date of search",type=str,required=True)
-parser.add_argument("-i","--ip",help="IP address to search for",type=str,required=True)
+parser.add_argument("-i","--ip",help="Resource address to search for",type=str,required=True)
 parser.add_argument("-l","--limit",help="Set Limit of return",type=int,required=False)
 parser.add_argument("-d","--debug",help="Set Debug on",action="store_true",required=False)
 parser.add_argument("-b","--convert",help="return from utc to localtime",action="store_true",required=False)
@@ -36,7 +36,7 @@ if opt.debug:
    hawk.debug()
 
 if opt.limit:
-    data = res.searchIpDstByGroup(lib.conDateToUtc(opt.start),lib.conDateToUtc(opt.end),opt.ip,opt.client,lm=opt.limit)
+    data = res.searchIpSrcByGroup(lib.conDateToUtc(opt.start),lib.conDateToUtc(opt.end),opt.ip,opt.client,lm=opt.limit)
 else:
   data = []
   if opt.convert:
@@ -53,28 +53,24 @@ else:
            data.append(i)
 data.sort(key=itemgetter('date_added'))
 if opt.payload:
-   table = [("Date","Resource","IP Src","IP Dst","AlertName","Client","Payload")]
+   table = [("Date","Resource","AlertName","Client","Payload")]
 else:
-   table = [("Date","Resource","IP Src","IP Dst","AlertName","Client")]
+   table = [("Date","Resource","AlertName","Client")]
 for i in data:
-    if "resource_name" not in i:
-        name = "None"
-    else:
-        name = i["resource_name"]
     if opt.convert:
        if opt.payload:
-          table.append((lib.conDateToLocal(i["date_added"]),name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"],i["payload"]))
+         table.append((lib.conDateToLocal(i["date_added"]),i["resource_addr"],i["alert_name"],i["group_name"],i["payload"]))
        else:
-          table.append((lib.conDateToLocal(i["date_added"]),name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"]))
+         table.append((lib.conDateToLocal(i["date_added"]),i["resource_addr"],i["alert_name"],i["group_name"]))
     else:
-       if opt.payload: 
-          table.append((i["date_added"],name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"],i["payload"]))
+       if opt.payload:
+          table.append((i["date_added"],i["ip_resource_addr"],i["alert_name"],i["group_name"],i["payload"]))
        else:
-          table.append((i["date_added"],name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"]))
+          table.append((i["date_added"],i["ip_resource_addr"],i["alert_name"],i["group_name"]))
 
 print " "
 print "|-------------------------------|"
-print "| Search for IP by Destination  |"
+print "| Search for Resource Address   |"
 print "|-------------------------------|"
 if opt.convert:
    print "**Time in date field set to localtime**"
