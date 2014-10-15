@@ -19,6 +19,7 @@ parser.add_argument("-i","--ip",help="IP address to search for",type=str,require
 parser.add_argument("-l","--limit",help="Set Limit of return",type=int,required=False)
 parser.add_argument("-d","--debug",help="Set Debug on",action="store_true",required=False)
 parser.add_argument("-b","--convert",help="return from utc to localtime",action="store_true",required=False)
+parser.add_argument("-a","--payload",help="add payload",action="store_true",required=False)
 
 if len(sys.argv) < 7:
     parser.print_help()
@@ -40,6 +41,8 @@ else:
   data = []
   if opt.convert:
      dates = lib.getDates(lib.conDateToUtc(opt.start),lib.conDateToUtc(opt.end))
+  else:
+     dates = lib.getDates(opt.start,opt.end) 
   for i in dates:
       start,end,idit = i
       f = res.searchIpSrcByGroup(start,end,opt.ip,opt.client) 
@@ -49,16 +52,25 @@ else:
        for i in f:
            data.append(i)
 data.sort(key=itemgetter('date_added'))
-table = [("Date","Resource","IP Src","IP Dst","AlertName","Client")]
+if opt.payload:
+   table = [("Date","Resource","IP Src","IP Dst","AlertName","Client","Payload")]
+else:
+   table = [("Date","Resource","IP Src","IP Dst","AlertName","Client")]
 for i in data:
     if "resource_name" not in i:
         name = "None"
     else:
         name = i["resource_name"]
     if opt.convert:
-       table.append((lib.conDateToLocal(i["date_added"]),name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"]))
+       if opt.payload:
+          table.append((lib.conDateToLocal(i["date_added"]),name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"],i["payload"]))
+       else:
+          table.append((lib.conDateToLocal(i["date_added"]),name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"]))
     else:
-       table.append((i["date_added"],name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"]))
+       if opt.payload: 
+          table.append((i["date_added"],name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"],i["payload"]))
+       else:
+          table.append((i["date_added"],name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"]))
 
 print " "
 print "|-------------------------------|"
