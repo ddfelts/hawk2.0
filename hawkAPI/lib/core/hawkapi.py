@@ -635,6 +635,7 @@ class hawkapi():
                     "column[5]":"name",
                     "column[8]":"priority",
                     "column[9]":"group_name",
+                    "column[10]":"payload",
                     #"order_by":"date_added",
                     "where[0]":"group_name = '%s'" % client,
                     "where[1]":"resource_addr = ('%s')" % ra,
