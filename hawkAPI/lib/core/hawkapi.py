@@ -68,51 +68,18 @@ class hawkapi():
           return self.hawk.getUsers(ndata)
 
       def getResByGroup(self,client,mtype=""):
-          '''
-          Fixed Duplicate Resources
-          Added a dic to return resource and total
-          resource = json
-          total = total count of resources          
-          --------------------------------------------------
-          class_type,resource_name,os_type_details
-          resource_group,resource_id,class_name,class_detail
-          resource_address6,recource_detail,resource_address
-          date_added,last_seen,os_type_name
-          --------------------------------------------------
-           Special note:  the return at times will not produce
-                          all these columns
-          '''
           ndata = {"column[0]":"resource_name",
                    "where[0]":"resource_group = '%s'" % client}
           if mtype != "":
-              ndata.update({"where[1]":"class_type != '%s'" % mtype})
-          data = self.hawk.getDevices(ndata)
-          resource = []
-          final = {"total":0,"resource":[]}
-          for i in data:
-               if  i["resource_name"] in resource:
-                   pass
-               else:
-                   resource.append(i["resource_name"])
-                   final["resource"].append(i)
-                   final["total"] += 1
-          return final
+              ndata.update({"where[1]":"class_type = '%s'" % mtype})
+          return self.hawk.getDevices(ndata)
 
       def getResTypeByGroup(self,client,mtype="IDS"):
           ndata = {"column[0]":"resource_name",
-                  "where[0]":"resource_group = '%s'" % client,
-                  "where[1]":"class_type = '%s'" % mtype}
-          data = self.hawk.getDevices(ndata)
-          resource = []
-          final = {"total":0,"resource":[]}
-          for i in data:
-               if  i["resource_name"] in resource:
-                   pass
-               else:
-                   resource.append(i["resource_name"])
-                   final["resource"].append(i)
-                   final["total"] += 1
-          return final
+                   "where[0]":"resource_group = '%s'" % client,
+                   "where[1]":"class_type = '%s'" % mtype}
+          return self.hawk.getDevices(ndata)
+
 
       def getResType(self,mtype="IDS"):
           ndata = {"column[0]":"resource_name",
