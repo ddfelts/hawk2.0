@@ -4,7 +4,7 @@ hawk2.0
 Using scripts
 
 <h2>failedattempts:</h2>
-   $./failedattempts
+   <code>$./failedattempts
    Usage: failedattempts [-h] -u USER -p PASSW -i SERVER -c CLIENT 
                          [-d DIR] -s START -e END [-db] [-l LIMIT]
                          [-t TYPE] -o OUTPUT
@@ -30,4 +30,4 @@ Using scripts
           -t TYPE, --type TYPE  type of failure (login,action) default login
           -o OUTPUT, --output OUTPUT
                         output type (console,csv,xlsx) default console
-     
+     </code>
