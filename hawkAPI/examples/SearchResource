@@ -8,7 +8,7 @@ import argparse
 import sys
 
 usage = 'SearchResource -u uid -p pass -c hawkip -g client -s "start" -e "end" -i resaddress -l limitofreturn'
-parser = argparse.ArgumentParser(description="Search by IP destination",epilog=usage)
+parser = argparse.ArgumentParser(description="Search by Resource",epilog=usage)
 parser.add_argument("-u","--user",help="Username",type=str,required=True)
 parser.add_argument("-p","--passw",help="Password",type=str,required=True)
 parser.add_argument("-c","--server",help="The hawk server IP",type=str,required=True)
@@ -45,10 +45,12 @@ else:
      dates = lib.getDates(opt.start,opt.end) 
   for i in dates:
       start,end,idit = i
+      
       f = res.searchIpSrcByGroup(start,end,opt.ip,opt.client) 
       if not f:
        pass
       else:
+       
        for i in f:
            data.append(i)
 data.sort(key=itemgetter('date_added'))
@@ -64,9 +66,9 @@ for i in data:
          table.append((lib.conDateToLocal(i["date_added"]),i["resource_addr"],i["alert_name"],i["group_name"]))
     else:
        if opt.payload:
-          table.append((i["date_added"],i["ip_resource_addr"],i["alert_name"],i["group_name"],i["payload"]))
+          table.append((i["date_added"],i["resource_addr"],i["alert_name"],i["group_name"],i["payload"]))
        else:
-          table.append((i["date_added"],i["ip_resource_addr"],i["alert_name"],i["group_name"]))
+          table.append((i["date_added"],i["resource_addr"],i["alert_name"],i["group_name"]))
 
 print " "
 print "|-------------------------------|"

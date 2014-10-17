@@ -1,0 +1,106 @@
+#!/usr/bin/python
+from hawkAPI.lib.core.hawkcore import hawkcore
+from hawkAPI.lib.core.hawkapi import hawkapi
+from hawkAPI.lib.core.hawklib import hawklib
+from hawkAPI.lib.plugins.hawkCSV import hawkCSV
+from hawkAPI.lib.plugins.hawkXLSX import hawkXLSX
+
+from operator import itemgetter
+import inspect
+import sys
+import argparse
+
+
+#usage = 'failedattemptsCSV -u "id" -p "pass" -i "server" -c "client" -s start -e end -d directory -t type'
+usage = "Created By Dan Felts"
+parser = argparse.ArgumentParser(description="Get failed attempt logins by group",epilog=usage)
+parser.add_argument("-u","--user",help="Username",type=str,required=True)
+parser.add_argument("-p","--passw",help="Password",type=str,required=True)
+parser.add_argument("-i","--server",help="The hawk server IP",type=str,required=True)
+parser.add_argument("-c","--client",help="The client name",type=str,required=True)
+parser.add_argument("-d","--dir",help="location to store",type=str,required=False)
+parser.add_argument("-s","--start",help="Start Date",type=str,required=True)
+parser.add_argument("-e","--end",help="End Date",type=str,required=True)
+parser.add_argument("-db","--debug",help="Set Debug on",action="store_true",required=False)
+parser.add_argument("-l","--limit",help="Set Limit of return",type=int,required=False)
+parser.add_argument("-t","--type",help="type of failure (login,action) default login",type=str,required=False)
+parser.add_argument("-o","--output",help="output type (console,csv,xlsx) default console",type=str,required=True)
+if len(sys.argv) < 8:
+    parser.print_help()
+    sys.exit()
+opt = parser.parse_args()
+hawk = hawkcore(opt.server)
+if opt.debug:
+    hawk.debug()
+
+if opt.output == "csv" or opt.output == "xlsx":
+    if not opt.dir or len(opt.dir) <= 0:
+       print ""
+       print " ** Need the -d switch to define the directory to save the file **"
+       print ""
+       parser.print_help()
+       hawk.logout()
+       sys.exit(1)
+
+hawk.login(opt.user,opt.passw)
+res = hawkapi(hawk)
+lib = hawklib(hawk)
+
+if not opt.type:
+    ty = "login"
+if opt.type != "login" or opt.type != "action":
+   ty = "login"
+else:
+   ty = opt.type
+
+if opt.limit:
+    c = res.getFailedLoginsByGroup(opt.start,opt.end,opt.client,tp=ty,lm=opt.limit)
+else:
+    c = []
+    dates = lib.getDates(opt.start,opt.end)
+    data = []
+    for i in dates:
+        start,end,idit = i
+        print "%s:%s --- %s" % (start,end,idit)
+        f = res.getFailedLoginsByGroup(start,end,opt.client,tp=ty)
+        if not f:
+          pass
+        else:
+          for i in f:
+              c.append(i)
+c.sort(key=itemgetter('date_added'))
+
+if opt.output == "console":
+     print " "
+     print "|-------------------------------|"
+     print "| Failed Attempts               |"
+     print "|-------------------------------|"
+     print "Group: %s" % unicode(opt.client)
+     print "Start: %s  End: %s" %(opt.start,opt.end)
+     print " "
+     table = [("Date","Resource","IP Src","IP Dst","AlertName","Client")]
+     for i in c:
+       if "resource_name" not in i:
+          name = "None"
+       else:
+          name = i["resource_name"]
+       table.append((i["date_addded"],name,i["ip_src"],i["ip_dst"],i["alert_name"],i["group_name"]))
+     lib.print_table(table)
+     hawk.logout()
+     sys.exit(1)
+
+if opt.output == "csv":
+       keys = ["Date","Resource","IP Src","IP Dst","AlertName","Client"]
+       csv = hawkCSV("%s/%s.csv" % (opt.dir,opt.client),hawk)
+       csv.build(c,nkeys=keys)
+       hawk.logout()
+       sys.exit(1)
+
+if opt.output == "xlsx":
+       keys = ["Date","Resource","IP Src","IP Dst","AlertName","Client"]
+       csv = hawkXLSX("%s/%s.xlsx" % (opt.dir,opt.client),hawk)
+       csv.build(c,nkeys=keys)
+       hawk.logout()
+       sys.exit(1)
+
+
