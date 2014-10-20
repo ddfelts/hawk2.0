@@ -96,11 +96,12 @@ class hawkPDF:
              canvas.setFont("Times-Bold",16)
              canvas.drawString(1 * inch,8.5 * inch,"Start (%s) - End (%s)" % (self.startDate,self.endDate))
              canvas.drawString(1 * inch,8.25 * inch,"Client: %s" % self.client)
-             iw,ih = self.get_im_size(self.image)
-             aspect = self.get_aspect(self.image)
+
              if self.image != "":
+                aspect = self.get_aspect(self.image)
                 canvas.drawImage(self.image,self.lw-150,self.lh-80,width=120,height=(120 * aspect))
              if self.cimage != "":
+                aspect = self.get_aspect(self.cimage)
                 canvas.drawImage(self.cimage,2.0625 * inch,self.lh-400,width=self.lw/2,height=(self.lw/2 * aspect))
              canvas.restoreState()
 
