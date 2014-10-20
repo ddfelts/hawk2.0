@@ -1,0 +1,126 @@
+#!/usr/bin/python
+
+import sys
+import os
+import string
+from hawkAPI.lib.core.hawkcore import hawkcore 
+from hawkAPI.lib.core.hawkapi import hawkapi
+from hawkAPI.lib.core.hawklib import hawklib
+from hawkAPI.lib.plugins.hawkGraph import hawkGraph
+from hawkAPI.lib.plugins.hawkPDF import hawkPDF
+
+from operator import itemgetter
+import argparse
+
+
+usage = 'HawkIdsClient -u uid -p pass -i hawkip -c client -d days -l directory'
+parser = argparse.ArgumentParser(description="PDF output by client for IDS alerts",epilog=usage)
+parser.add_argument("-u","--user",help="Username",type=str,required=True)
+parser.add_argument("-p","--passw",help="Password",type=str,required=True)
+parser.add_argument("-i","--server",help="The hawk server IP",type=str,required=True)
+parser.add_argument("-c","--client",help="Client name",type=str,required=True)
+parser.add_argument("-d","--days",help="Number of Days",type=int,required=True)
+parser.add_argument("-l","--dir",help="location to store",type=str,required=True)
+parser.add_argument("-o","--logo",help="path to logo",type=str,required=False)
+
+if len(sys.argv) < 5:
+    parser.print_help()
+    sys.exit()
+opt = parser.parse_args()
+
+graph = hawkGraph()
+hawk = hawkcore(opt.server)
+hawk.login(opt.user,opt.passw)
+#hawk.debug()
+res = hawkapi(hawk)
+lib = hawklib(hawk)
+
+start = lib.getDateUtc("d",delta=opt.days)
+end = lib.getDateUtc()
+client = opt.client
+lm = 10
+
+#Get Top Priority for the client
+main = []
+data = res.getAllIdsPriorityByGroup(str(start),str(end),str(client))
+for i in data:
+    main.append({"title":i["priority"],
+                 "data":int(i["priority_count"])})   
+graph.HBar("Priority",main)
+pdata = data
+
+
+#Get Top IP srcs by the group name
+main = []
+data = res.getTopIdsIpSrcByGroup(str(start),str(end),str(client),lm=10)
+for i in data:
+     main.append({"title":i["ip_src"],
+                 "data":int(i["ip_src_count"])})
+graph.Pie("Top_IP_Source",main)
+ipdata = data
+
+
+#Get Top IP Dst by the group name
+main = []
+data = res.getTopIdsIpDstByGroup(str(start),str(end),opt.client,lm=10)
+for i in data:
+     main.append({"title":i["ip_dst"],
+                 "data":int(i["ip_dst_count"])})
+graph.Pie("Top_IP_Dst",main)
+dstdata = data
+
+#Get Top alerts by group name
+main = []
+data = res.getTopIdsAlertsByGroup(str(start),str(end),opt.client,lm=10)
+for i in data:
+    main.append({"title":i["alert_name"],
+                 "data":int(i["alert_name_count"])})
+graph.HBar("Top_Ten_Alerts",main)
+adata = data
+hawk.logout()
+
+nameit = opt.dir + opt.client + "-ids.pdf"
+doc = hawkPDF(nameit,hawk)
+#doc.setPageLetter()
+doc.setTitle("Client Top Ten IDS Report")
+doc.setDate(str(start),str(end))
+doc.setClientName(opt.client)
+if opt.logo:
+   doc.setClientImage(opt.logo)
+
+doc.setPageImage("/home/ddfelts/download.jpg")
+doc.addPageBreak()
+
+doc.createToc()
+
+doc.addStoryTitle("Top Ten IP Sources")
+doc.addStory("Top ten IP sources outlines the top ten source IP addresses creating alerts.")
+doc.addImage("%s/Top_IP_Source.png" % graph.getDir(),450,200)
+keys = ["ip_src","ip_src_count"]
+doc.addTable(ipdata,nkeys=keys)
+doc.addPageBreak()
+
+doc.addStoryTitle("Top Ten Destinations")
+doc.addStory("Top ten IP destination outlines the top ten targets being attacked or causing alerts on the network.")
+doc.addImage("%s/Top_IP_Dst.png" % graph.getDir(),450,200)
+keys = ["ip_dst","ip_dst_count"]
+doc.addTable(dstdata,nkeys=keys)
+doc.addPageBreak()
+
+doc.addStoryTitle("Top Priorities")
+doc.addStory("Alert Priority (Assigned by HAWK, or provided by 3rd-party Vendor ) 1= high to 5 = informational")
+doc.addImage("%s/Priority.png" % graph.getDir(),450,200)
+keys = ["priority","priority_count"]
+doc.addTable(pdata,nkeys=keys)
+doc.addPageBreak()
+
+doc.addStoryTitle("Top Ten Alerts")
+doc.addStory("This information displays the top ten alerts that are present and that have been seen in the current enviroment")
+doc.addImage("%s/Top_Ten_Alerts.png" % graph.getDir(),450,200)
+keys = ["alert_name","alert_name_count"]
+doc.addTable(adata,nkeys=keys)
+doc.addPageBreak()
+
+doc.savePdf()
+graph.removeDir() 
+sys.exit(1)
