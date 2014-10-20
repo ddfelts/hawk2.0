@@ -6,6 +6,7 @@ from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.rl_config import defaultPageSize
 from reportlab.lib.units import inch
+from reportlab.lib import utils
 from reportlab.pdfgen import canvas
 from reportlab.graphics.shapes import Rect, Line
 from reportlab.lib.colors import red, green, black, blue, lightblue
@@ -43,6 +44,7 @@ class hawkPDF:
           self.endDate = ""
           self.client = ""
           self.image = ""
+          self.cimage = ""
           self.hlib = hawklib(hawk)
           #self.lw,self.lh = letter
           self.pgtype = "letter"
@@ -64,6 +66,16 @@ class hawkPDF:
       def setClientName(self,name):
           self.client = name
 
+      def get_aspect(self,path):
+          img = utils.ImageReader(path)
+          iw,ih = img.getSize()
+          aspect = ih / float(iw)
+          return aspect
+
+      def get_im_size(self,path):
+          img = utils.ImageReader(path)
+          return img.getSize()
+
       def myFirstPage(self,canvas,doc):
           canvas.saveState()
           if self.pgtype == "landscape":
@@ -74,7 +86,9 @@ class hawkPDF:
              canvas.setFont("Times-Bold",14)
              canvas.drawString(1 * inch,5.75 * inch,"Start (%s) - End (%s)" % (self.startDate,self.endDate))
              canvas.drawString(1 * inch,5.55 * inch,"Client: %s" % self.client)
-             canvas.drawImage(self.image,self.lw/2.0,self.lh-168)
+             if self.image != "":
+                canvas.drawImage(self.image,self.lw/2.0,self.lh-168,width=150,height=50)
+             canvas.restoreState()
           else:
              #canvas.setPageSize((self.lw,self.lh))
              canvas.setFont("Times-Bold",30)
@@ -82,7 +96,12 @@ class hawkPDF:
              canvas.setFont("Times-Bold",16)
              canvas.drawString(1 * inch,8.5 * inch,"Start (%s) - End (%s)" % (self.startDate,self.endDate))
              canvas.drawString(1 * inch,8.25 * inch,"Client: %s" % self.client)
-             canvas.drawImage(self.image,self.lw/2.0,self.lh-168)
+             iw,ih = self.get_im_size(self.image)
+             aspect = self.get_aspect(self.image)
+             if self.image != "":
+                canvas.drawImage(self.image,self.lw-150,self.lh-80,width=120,height=(120 * aspect))
+             if self.cimage != "":
+                canvas.drawImage(self.cimage,2.0625 * inch,self.lh-400,width=self.lw/2,height=(self.lw/2 * aspect))
              canvas.restoreState()
 
       def myLaterPage(self,canvas,doc):
@@ -109,8 +128,11 @@ class hawkPDF:
           self.startDate = start
           self.endDate = end
 
-      def setClientImage(self,image):
+      def setPageImage(self,image):
           self.image = image
+
+      def setClientImage(self,image):
+          self.cimage = image
 
       def createToc(self):
           centered = PS(name = 'centered',  
@@ -142,7 +164,6 @@ class hawkPDF:
           else:
              keys = nkeys 
              data.append(nkeys)
-
           for x in ndata:
               lister = [] 
               for b in range(len(keys)):
@@ -173,4 +194,6 @@ class hawkPDF:
           self.story.append(PageBreak())
 
       def savePdf(self):
+          if self.doc == "":
+             self.setPageLetter()
           self.doc.multiBuild(self.story,onFirstPage=self.myFirstPage, onLaterPages=self.myLaterPage)
