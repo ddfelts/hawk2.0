@@ -22,6 +22,7 @@ parser.add_argument("-c","--client",help="Client name",type=str,required=True)
 parser.add_argument("-d","--days",help="Number of Days",type=int,required=True)
 parser.add_argument("-l","--dir",help="location to store",type=str,required=True)
 parser.add_argument("-o","--logo",help="path to logo",type=str,required=False)
+parser.add_argument("-a","--plogo",help="path to page logo",type=str,required=False)
 
 if len(sys.argv) < 5:
     parser.print_help()
@@ -87,8 +88,8 @@ doc.setDate(str(start),str(end))
 doc.setClientName(opt.client)
 if opt.logo:
    doc.setClientImage(opt.logo)
-
-doc.setPageImage("/home/ddfelts/download.jpg")
+if opt.plogo:
+   doc.setPageImage(opt.plogo)
 doc.addPageBreak()
 
 doc.createToc()
