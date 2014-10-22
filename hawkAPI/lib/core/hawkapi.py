@@ -372,6 +372,24 @@ class hawkapi():
               ndata.update({"where[2]":"resource_name = '%s'" % res})
           return self.hawk.getEvents(ndata)
 
+      def getTopIdsAlertsByGroup(self,start,end,group,lm=0,res=""):
+           ndata = {"column[1]":"date_added",
+                    "column[2]":"ip_src",
+                    "column[3]":"ip_dst",
+                    "column[4]":"alert_name",
+                    "column[5]":"group_name",
+                    "column[6]":"count alert_name",
+                    "order_by":"alert_name_count DESC",
+                    "group_by":"alert_name",
+                    "where[0]":"class_type = 'IDS'",
+                    "where[1]":"group_name = '%s'" % group,
+                    "begin":"%s" % start,
+                    "end":"%s" % end}
+           if lm != 0:
+              ndata.update({"limit":"%s" % lm})
+           if res != "":
+              ndata.update({"where[2]":"resource_name = '%s'" % res})
+           return self.hawk.getEvents(ndata)
 
       def getAlerts(self,start,end,lm=0,ct="",an=""):
           ndata = {"column[1]":"date_added",
@@ -773,3 +791,14 @@ class hawkapi():
                    "where[1]":"ip_port != '0'",
                    "limit":"%s" % str(lm)}
           return self.hawk.checkData(self.hawk.getVulns(ndata))
+
+      def getTimeDiffByGroup(self,client):
+          ndata = {"column[0]":"resource_name",
+                   "column[1]":"resource_address",
+                   "column[4]":"resource_group",
+                   "column[2]":"last_seen",
+                   "column[5]":"class_type",
+                   "column[3]":"timediff_seconds last_seen",
+                   "group_by":"resource_name",
+                   "where[0]":"resource_group = ('%s')" % client}
+          return self.hawk.getDevices(ndata)
