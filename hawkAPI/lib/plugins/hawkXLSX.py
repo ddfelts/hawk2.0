@@ -6,19 +6,19 @@ class hawkXLSX():
         def __init__(self,fn,hawk):
 
             self.wk = xlsxwriter.Workbook(fn)
-            self.ws = self.wk.add_worksheet()
+            #self.ws = self.wk.add_worksheet()
             self.bold = self.wk.add_format({'bold':True,'border':1,'align':'center'})
             self.hlib = hawklib(hawk)
 
-        def build(self,data,nkeys=None):
-            print len(data)
+        def addpage(self,name,data,nkeys=None):
+            ws = self.wk.add_worksheet(name) 
             if not nkeys:
                keys = self.hlib.getKeys(data)
             else:
                keys = nkeys 
             col=0
             for x in keys:
-                self.ws.write(0,col,str(x),self.bold)
+                ws.write(0,col,str(x),self.bold)
                 col+=1
             row=1
             col=0
@@ -28,8 +28,10 @@ class hawkXLSX():
                         outb = None
                      else:
                         outb = x[keys[b]]
-                     self.ws.write(row,col,str(outb))
+                     ws.write(row,col,str(outb))
                      col+=1
                  row+=1
                  col=0
+
+        def close(self):
             self.wk.close()
