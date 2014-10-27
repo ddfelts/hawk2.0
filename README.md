@@ -33,11 +33,11 @@ Add Python to your path:
 
      C:\Python27\;C:\Python\Scripts\
 
-Download the <a href="bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py">ez_setup.py</a> script.
+Download the <a href="https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py">ez_setup.py</a> script.
 
       python ez_setup.py
 
-Get Pip <a href="raw.github.com/pypa/pip/master/contrib/get_pip.py">get_pip.py</a>
+Get Pip <a href="https://raw.github.com/pypa/pip/master/contrib/get_pip.py">get_pip.py</a>
 
       python get_pip.py
 
