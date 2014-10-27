@@ -37,7 +37,7 @@ Download the <a href="https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_set
 
       python ez_setup.py
 
-Get Pip <a href="https://github.com/pypa/pip">get_pip.py</a>
+Get Pip <a href="https://pip.pypa.io/en/latest/installing.html">get_pip.py</a>
 
       python get_pip.py
 
