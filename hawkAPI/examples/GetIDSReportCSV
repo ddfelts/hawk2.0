@@ -1,0 +1,87 @@
+#!/usr/bin/python
+
+########################################
+# Because of size of possible reports
+# we will get our data and put it into
+# a sqlite database as we do the pulls.
+########################################
+
+import time
+import sys
+import string
+from hawkAPI.lib.core.hawkcore import hawkcore
+from hawkAPI.lib.core.hawkapi import hawkapi
+from hawkAPI.lib.core.hawklib import hawklib
+from hawkAPI.lib.plugins.hawkCSV import hawkCSV
+import datetime
+from datetime import date, timedelta
+import argparse
+from operator import itemgetter
+import sqlite3 as lite
+
+
+
+usage = 'GetIDSReportCSV -u "id" -p "pass" -i "server" -c "client" -d days -l directory'
+parser = argparse.ArgumentParser(description="CVS output for client for IDS alerts",epilog=usage)
+parser.add_argument("-u","--user",help="Username",type=str,required=True)
+parser.add_argument("-p","--passw",help="Password",type=str,required=True)
+parser.add_argument("-i","--server",help="The hawk server IP",type=str,required=True)
+parser.add_argument("-c","--client",help="Client name",type=str,required=True)
+parser.add_argument("-d","--days",help="Number of Days",type=int,required=True)
+parser.add_argument("-l","--dir",help="location to store",type=str,required=True)
+
+
+
+
+opt = parser.parse_args()
+if len(sys.argv) < 5:
+     parser.print_help()
+     sys.exit()
+lite.enable_callback_tracebacks(True)
+con = lite.connect('%s.db' % opt.client)
+cur = con.cursor()
+cur.execute('''CREATE TABLE idsalerts (id INTEGER PRIMARY KEY, date TEXT, ip_src TEXT, ip_dst TEXT, alert_name TEXT)''')
+con.commit()
+hawk = hawkcore(opt.server)
+hawk.login(opt.user,opt.passw)
+res = hawkapi(hawk)
+lib = hawklib(hawk)
+hawk.setRetry(10)
+nameit = opt.dir + opt.client + "-utc-IDS.csv"
+top = ["date_added","ip_src","ip_dst","alert_name"]
+start = lib.getDateLocal(dtype="d",delta=opt.days).strftime("%Y-%m-%d")
+end = lib.getDateLocal().strftime("%Y-%m-%d")
+nend = str(start) + " 23:59:59"
+nstart = str(start) + " 00:00:00"
+alldates = lib.getDates(nstart,nend)
+
+for i in alldates:
+   bstart,bend,idit = i
+   print "%s:%s --- %s" %(bstart,bend,idit)
+   mdata = res.getIDSAlertsByGroup(bstart,bend,opt.client) 
+   if not mdata:
+       pass
+   else:
+      for b in mdata:
+          if b["ip_src"] == None:
+             src = "None"
+          else:
+             src = b["ip_src"]
+          if b["ip_dst"] == None:
+             dst = "None"
+          else:
+             dst = b["ip_dst"]
+
+          cur.execute('''INSERT INTO idsalerts (date,ip_src,ip_dst,alert_name) VALUES(?,?,?,?)''' ,(b["date_added"],src,dst,b["alert_name"]))
+
+con.commit()
+cur.execute("SELECT * FROM idsalerts ORDER BY date(date) DESC") 
+rows = cur.fetchall()
+f = open(nameit,'w')
+f.write('date_added,ip_src,ip_dst,alert_name\n')
+for row in rows:
+  f.write("%s,%s,%s,%s\n" % (row[1],row[2],row[3],row[4]))
+f.close()
+con.close()
+hawk.logout()
+sys.exit(1)
