@@ -415,6 +415,7 @@ class hawkapi():
                    "column[2]":"ip_src",
                    "column[3]":"ip_dst",
                    "column[4]":"alert_name",
+                   "column[8]":"payload",
                    "column[5]":"group_name",
                    "column[6]":"geoip_name ip_src",
                    "column[7]":"geoip_name ip_dst",
