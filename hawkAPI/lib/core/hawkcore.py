@@ -112,7 +112,7 @@ class hawkcore(object):
                  return ndata
          except requests.exceptions.Timeout:
              self.doGet(data)
-         except requests.execptions.ConnectionError:
+         except requests.exceptions.ConnectionError:
              self.doTest(api,data)
 
 
@@ -153,7 +153,7 @@ class hawkcore(object):
                    return 0
          except requests.exceptions.Timeout:
              self.doTest(api,data)
-         except requests.execptions.ConnectionError:
+         except requests.exceptions.ConnectionError:
              self.doTest(api,data)
 
       def getDevices(self,data={}):
