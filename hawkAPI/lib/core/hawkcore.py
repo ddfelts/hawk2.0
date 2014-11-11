@@ -31,12 +31,12 @@ class hawkcore(object):
           if level == "DEBUG":
              logging.debug(message)
      	  if level == "INFO":
-	         logging.info(message)
-	      if level == "WARNING":
+	     logging.info(message)
+	  if level == "WARNING":
              logging.warning(message)
-	      if level == "ERROR":
+	  if level == "ERROR":
              logging.error(message)
-	      if level == "CRITICAL":
+	  if level == "CRITICAL":
              logging.critical(message)
 
       def debug(self,level=1):
