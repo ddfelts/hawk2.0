@@ -30,13 +30,13 @@ class hawkcore(object):
              logging.basicConfig(filename=fout,level=logging.DEBUG)
           if level == "DEBUG":
              logging.debug(message)
-	  if level == "INFO":
-	     logging.info(message)
-	  if level == "WARNING":
+     	  if level == "INFO":
+	         logging.info(message)
+	      if level == "WARNING":
              logging.warning(message)
-	  if level == "ERROR":
+	      if level == "ERROR":
              logging.error(message)
-	  if level == "CRITICAL":
+	      if level == "CRITICAL":
              logging.critical(message)
 
       def debug(self,level=1):
@@ -111,8 +111,7 @@ class hawkcore(object):
              else:
                  return ndata
          except requests.exceptions.Timeout:
-             print "Request Timeout during doGet function"
-             sys.exit(1)
+             self.doGet(data)
 
 
       def doPost(self,api,data={}):
@@ -151,8 +150,8 @@ class hawkcore(object):
              else:
                    return 0
          except requests.exceptions.Timeout:
-             print "Request Timeout during doPost function doing retry"
-             return 0
+             self.doTest(api,data)
+             
 
       def getDevices(self,data={}):
          url = "search/resource" 
