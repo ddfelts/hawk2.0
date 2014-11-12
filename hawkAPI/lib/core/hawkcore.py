@@ -117,8 +117,6 @@ class hawkcore(object):
          except SocketError as e:
              if e.errno == errno.ECONNRESET:
                  self.doGet(data)
-         except requests.exceptions.ConnectionError:
-             self.doGet(data)
 
 
       def doPost(self,api,data={}):
@@ -161,8 +159,6 @@ class hawkcore(object):
          except SocketError as e:
              if e.errno == errno.ECONNRESET:
                 self.doTest(data)
-         except requests.exceptions.ConnectionError:
-             self.doTest(api,data)
 
       def getDevices(self,data={}):
          url = "search/resource" 
