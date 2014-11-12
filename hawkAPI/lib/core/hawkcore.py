@@ -4,6 +4,8 @@ import json
 import logging
 import httplib
 import time
+from socket import error as SocketError
+import errno
 
 class hawkcore(object):
 
@@ -112,8 +114,11 @@ class hawkcore(object):
                  return ndata
          except requests.exceptions.Timeout:
              self.doGet(data)
+         except SocketError as e:
+             if e.errno == errno.ECONNRESET:
+                 self.doGet(data)
          except requests.exceptions.ConnectionError:
-             self.doTest(api,data)
+             self.doGet(data)
 
 
       def doPost(self,api,data={}):
@@ -153,6 +158,9 @@ class hawkcore(object):
                    return 0
          except requests.exceptions.Timeout:
              self.doTest(api,data)
+         except SocketError as e:
+             if e.errno == errno.ECONNRESET:
+                self.doTest(data)
          except requests.exceptions.ConnectionError:
              self.doTest(api,data)
 
