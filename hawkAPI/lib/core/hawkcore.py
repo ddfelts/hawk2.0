@@ -139,7 +139,7 @@ class hawkcore(object):
              ndata = ""
              try:
                 ndata = r.json()
-             except JSONDecodeError:
+             except ConnectionError:
                 self.doTest(api,data)
              if len(ndata) > 1:
                 if self.debugit == "True":
