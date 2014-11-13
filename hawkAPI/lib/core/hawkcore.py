@@ -80,7 +80,7 @@ class hawkcore(object):
              return 0
           if not data:
              return 0
-          ndata = json.loads(data)
+          ndata = json.load(data)
           if "status" in ndata:
               if ndata["status"] == "success":
                  return ndata["results"]                
