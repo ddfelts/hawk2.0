@@ -147,7 +147,10 @@ class hawkcore(object):
              #for data in r.iter_content(chunk_size=1024):
              #    if data:
              #       ndata += data
-             ndata = r.json()
+             try:
+                ndata = r.json()
+             except simplejson.decoder.JSONDecodeError:
+                self.doTest(api,data)
              if len(ndata) > 1:
                 if self.debugit == "True":
                    print ndata
