@@ -137,7 +137,9 @@ class hawkcore(object):
                    return 0
                ndata = ""
                try:
-                   ndata = json.loads(r.text)
+                   for i in r.iter_content(chunk_size=512):
+                       if i:
+                          ndata += i.decode('string-escape')
                except:
                    return 0
                if len(ndata) > 1:
