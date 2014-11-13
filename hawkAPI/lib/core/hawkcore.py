@@ -142,7 +142,7 @@ class hawkcore(object):
                 ndata = r.text()
              #for line in r.iter_lines():
              #    ndata += line
-             ndata = r.raw()
+             
              if len(ndata) > 1:
                 if self.debugit == "True":
                    print ndata
