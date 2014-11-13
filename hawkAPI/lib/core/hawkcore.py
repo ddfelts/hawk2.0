@@ -137,15 +137,13 @@ class hawkcore(object):
                    return 0
                ndata = ""
                try:
-                   for i in r.iter_content(chunk_size=1024):
-                       if i:
-                          ndata += i.decode('string-escape')
+                   #for i in r.iter_content(chunk_size=1024):
+                   #    if i:
+                   #       ndata += i.decode('string-escape')
+                   ndata = r.json()
                except:
                    return 0
-               try: 
-                  ndata = json.loads(ndata)
-               except:
-                  return 0
+               
                if len(ndata) > 1:
                   if self.debugit == "True":
                      print ndata
