@@ -154,10 +154,10 @@ class hawkcore(object):
                 print "Proper code not returned %s doing retry" % r.status_code
                 return 0
              ndata = ""
-             #for data in r.iter_content(chunk_size=1024):
-             #    if data:
-             #       ndata += data
-             ndata = r.content()
+             for data in r.iter_content(chunk_size=1024):
+                 if data:
+                    ndata += data
+             #ndata = r.content()
              if len(ndata) > 1:
                 if self.debugit == "True":
                    print ndata
