@@ -85,6 +85,7 @@ class hawkcore(object):
           except ValueError:
              self.reSession()
              self.login(self.user,self.passw)
+             return 0
           if "status" in ndata:
               if ndata["status"] == "success":
                  return ndata["results"]                
