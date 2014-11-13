@@ -73,6 +73,7 @@ class hawkcore(object):
           #sys.exit(1) 
  
       def checkData(self,data):
+          print len(data)
           if len(data) <= 0:
              return 0
           if data == "":
