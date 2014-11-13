@@ -135,7 +135,10 @@ class hawkcore(object):
                 print "Proper code not returned %s doing retry" % r.status_code
                 return 0
              ndata = ""
-             #ndata = r.text()
+             try:
+                ndata = r.json()
+             except:
+                ndata = r.text()
              #for line in r.iter_lines():
              #    ndata += line
              ndata = r.raw()
