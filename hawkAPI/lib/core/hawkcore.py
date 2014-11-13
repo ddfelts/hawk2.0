@@ -137,7 +137,7 @@ class hawkcore(object):
                    return 0
                ndata = ""
                try:
-                   for i in r.iter_content(chunk_size=512):
+                   for i in r.iter_content(chunk_size=1024):
                        if i:
                           ndata += i
                except:
