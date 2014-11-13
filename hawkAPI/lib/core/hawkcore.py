@@ -142,9 +142,9 @@ class hawkcore(object):
                           ndata += i.decode('string-escape')
                except:
                    return 0
-               try:
+               try: 
                   ndata = json.loads(ndata)
-               except requests.exceptions.ValueError:
+               except:
                   return 0
                if len(ndata) > 1:
                   if self.debugit == "True":
