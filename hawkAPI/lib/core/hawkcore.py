@@ -6,7 +6,6 @@ import httplib
 import time
 from socket import error as SocketError
 import errno
-import simplejson
 
 class hawkcore(object):
 
@@ -136,10 +135,10 @@ class hawkcore(object):
                 print "Proper code not returned %s doing retry" % r.status_code
                 return 0
              ndata = ""
-             try:
-                ndata = r.json()
-             except simplejson.decoder.JSONDecodeError:
-                self.doTest(api,data)
+             #ndata = r.text()
+             #for line in r.iter_lines():
+             #    ndata += line
+             ndata = r.raw()
              if len(ndata) > 1:
                 if self.debugit == "True":
                    print ndata
