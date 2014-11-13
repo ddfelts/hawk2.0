@@ -6,6 +6,7 @@ import httplib
 import time
 from socket import error as SocketError
 import errno
+from contextlib import closing
 
 class hawkcore(object):
 
@@ -128,34 +129,30 @@ class hawkcore(object):
       def doTest(self,api,data={}):
          url = "https://%s:8080/API/1.1/%s" % (self.server,api)
          try:
-             r = self.sess.post(url,data,verify=False,stream=True,allow_redirects=True)
-             if r.status_code == requests.codes.ok:
+             with closing(self.sess.post(url,data,verify=False,stream=True,allow_redirects=True)) as r:
+               if r.status_code == requests.codes.ok:
                 pass
-             else:
+               else:
                 print "Proper code not returned %s doing retry" % r.status_code
                 return 0
-             ndata = ""
-             try:
+               ndata = ""
+               try:
                 ndata = r.json()
-             except:
-                print r.text() 
-                ndata = r.text()
-             #for line in r.iter_lines():
-             #    ndata += line
-             
-             if len(ndata) > 1:
-                if self.debugit == "True":
-                   print ndata
-                   return self.checkData(ndata)
-                else:
-                   return self.checkData(ndata)
-             else:
+               except:
+                return 0
+               if len(ndata) > 1:
+                  if self.debugit == "True":
+                     print ndata
+                     return self.checkData(ndata)
+                  else:
+                     return self.checkData(ndata)
+               else:
                    return 0
          except requests.exceptions.Timeout:
-             self.doTest(api,data)
+                self.doTest(api,data)
          except SocketError as e:
-             if e.errno == errno.ECONNRESET:
-                self.doTest(data)
+                if e.errno == errno.ECONNRESET:
+                   self.doTest(data)
 
       def getDevices(self,data={}):
          url = "search/resource" 
