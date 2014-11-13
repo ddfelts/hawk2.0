@@ -131,15 +131,15 @@ class hawkcore(object):
          try:
              with closing(self.sess.post(url,data,verify=False,stream=True,allow_redirects=True)) as r:
                if r.status_code == requests.codes.ok:
-                pass
+                   pass
                else:
-                print "Proper code not returned %s doing retry" % r.status_code
-                return 0
+                   print "Proper code not returned %s doing retry" % r.status_code
+                   return 0
                ndata = ""
                try:
-                ndata = r.json()
+                   ndata = json.loads(r.text)
                except:
-                return 0
+                   return 0
                if len(ndata) > 1:
                   if self.debugit == "True":
                      print ndata
