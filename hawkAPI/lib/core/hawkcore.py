@@ -162,7 +162,7 @@ class hawkcore(object):
              if len(ndata) > 1:
                 if self.debugit == "True":
                    print ndata
-                   return self.checkData(data)
+                   return self.checkData(ndata)
                 else:
                    return self.checkData(ndata)
              else:
