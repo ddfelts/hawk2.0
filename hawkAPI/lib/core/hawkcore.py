@@ -81,9 +81,9 @@ class hawkcore(object):
           #   return 0
           if "status" in data:
               if data["status"] == "success":
-                 return ndata["results"]
+                 return data["results"]
               if data["status"] == "failure":
-                  if ndata["details"] == "Invalid session, unable to continue.":
+                  if data["details"] == "Invalid session, unable to continue.":
                      print 'Hawk Failure: geting new session'
                      self.debug()
                      self.reSession()
