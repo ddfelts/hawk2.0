@@ -73,19 +73,11 @@ class hawkcore(object):
           #sys.exit(1) 
  
       def checkData(self,data):
-
-          if len(data) <= 0:
-             return 0
-          if data == "":
-             return 0
-          if not data:
-             return 0
           try:
              ndata = json.loads(data)
           except ValueError:
-             #self.debug()
-             self.reSession()
-             self.login(self.user,self.passw)
+             return 0
+          except:
              return 0
           if "status" in ndata:
               if ndata["status"] == "success":
@@ -115,7 +107,7 @@ class hawkcore(object):
              #for data in r.iter_content(chunk_size=1024):
              #    if data:
              #       ndata += data
-             ndata = r.content()
+             ndata = r.json()
              if self.debugit == "True":
                  print ndata
                  return ndata
@@ -152,10 +144,10 @@ class hawkcore(object):
                 print "Proper code not returned %s doing retry" % r.status_code
                 return 0
              ndata = ""
-             for data in r.iter_content(chunk_size=1024):
-                 if data:
-                    ndata += data
-             #ndata = r.content()
+             #for data in r.iter_content(chunk_size=1024):
+             #    if data:
+             #       ndata += data
+             ndata = r.json()
              if len(ndata) > 1:
                 if self.debugit == "True":
                    print ndata
