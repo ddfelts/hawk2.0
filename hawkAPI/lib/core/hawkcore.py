@@ -139,10 +139,13 @@ class hawkcore(object):
                try:
                    for i in r.iter_content(chunk_size=1024):
                        if i:
-                          ndata += i
+                          ndata += i.decode('string-escape')
                except:
                    return 0
-               ndata = json.loads(ndata)
+               try:
+                  ndata = json.loads(ndata)
+               except requests.exceptions.ValueError:
+                  return 0
                if len(ndata) > 1:
                   if self.debugit == "True":
                      print ndata
