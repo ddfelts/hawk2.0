@@ -6,6 +6,7 @@ import httplib
 import time
 from socket import error as SocketError
 import errno
+import simplejson
 
 class hawkcore(object):
 
@@ -73,8 +74,6 @@ class hawkcore(object):
           #sys.exit(1) 
  
       def checkData(self,data):
-
-
           if "status" in data:
               if data["status"] == "success":
                  return data["results"]
@@ -139,7 +138,7 @@ class hawkcore(object):
              ndata = ""
              try:
                 ndata = r.json()
-             except requests.exceptions.ConnectionError:
+             except simplejson.decoder.JSONDecodeError:
                 self.doTest(api,data)
              if len(ndata) > 1:
                 if self.debugit == "True":
