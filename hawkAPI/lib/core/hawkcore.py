@@ -83,7 +83,8 @@ class hawkcore(object):
           try:
              ndata = json.loads(data)
           except ValueError:
-             return 0
+             self.reSession()
+             self.login(self.user,self.passw)
           if "status" in ndata:
               if ndata["status"] == "success":
                  return ndata["results"]                
