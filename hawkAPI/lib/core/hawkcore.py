@@ -73,7 +73,7 @@ class hawkcore(object):
           #sys.exit(1) 
  
       def checkData(self,data):
-          
+
           if len(data) <= 0:
              return 0
           if data == "":
@@ -96,7 +96,7 @@ class hawkcore(object):
                      self.debug()
                      self.reSession()
                      self.login(self.user,self.passw)
-                     
+
                      #print 'Hawk Failure',str(ndata)
                   return 0
           else:
@@ -133,13 +133,13 @@ class hawkcore(object):
       def doPost(self,api,data={}):
           if self.retry < self.setretry:
              bdata = self.doTest(api,data)
-             if bdata == 0:
+             if bdata != 0:
+                 self.retry = 0.
+                 return bdata
+             else:
                  time.sleep(3)
                  self.retry += 1
                  self.doPost(api,data)
-             else:
-                 self.retry = 0 
-                 return bdata
           else:
               print "Failed %s retrys" % str(self.retry)
               sys.exit(1)
@@ -154,11 +154,10 @@ class hawkcore(object):
                 print "Proper code not returned %s doing retry" % r.status_code
                 return 0
              ndata = ""
-             
-             for data in r.iter_content(chunk_size=1024):
-                 if data:
-                    ndata += data
-             
+             #for data in r.iter_content(chunk_size=1024):
+             #    if data:
+             #       ndata += data
+             ndata = r.content()
              if len(ndata) > 1:
                 if self.debugit == "True":
                    print ndata
