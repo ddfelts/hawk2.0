@@ -73,7 +73,7 @@ class hawkcore(object):
           #sys.exit(1) 
  
       def checkData(self,data):
-          print len(data)
+          
           if len(data) <= 0:
              return 0
           if data == "":
@@ -146,9 +146,11 @@ class hawkcore(object):
                 print "Proper code not returned %s doing retry" % r.status_code
                 return 0
              ndata = ""
-             for data in r.iter_content(chunk_size=1024):
-                 if data:
-                    ndata += data
+             ndata = r.content.partition('(')[-1].rpartition(')')[0]
+             #for data in r.iter_content(chunk_size=1024):
+             #    if data:
+             #       ndata += data
+             
              if len(ndata) > 1:
                 if self.debugit == "True":
                    print ndata
