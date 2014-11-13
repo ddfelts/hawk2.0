@@ -73,13 +73,13 @@ class hawkcore(object):
           #sys.exit(1) 
  
       def checkData(self,data):
-          try:
-             ndata = json.loads(data)
-          except ValueError:
-             return 0
-          except:
-             return 0
-          if "status" in ndata:
+          #try:
+          #   ndata = json.loads(data)
+          #except ValueError:
+          #   return 0
+          #except:
+          #   return 0
+          if "status" in data:
               if ndata["status"] == "success":
                  return ndata["results"]
               if ndata["status"] == "failure":
