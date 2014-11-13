@@ -107,9 +107,10 @@ class hawkcore(object):
                  self.logout()
                  sys.exit(1)
              ndata = ""
-             for data in r.iter_content(chunk_size=1024):
-                 if data:
-                    ndata += data
+             #for data in r.iter_content(chunk_size=1024):
+             #    if data:
+             #       ndata += data
+             ndata = r.content()
              if self.debugit == "True":
                  print ndata
                  return ndata
