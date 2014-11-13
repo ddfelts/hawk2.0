@@ -138,6 +138,7 @@ class hawkcore(object):
              try:
                 ndata = r.json()
              except:
+                print r.text() 
                 ndata = r.text()
              #for line in r.iter_lines():
              #    ndata += line
