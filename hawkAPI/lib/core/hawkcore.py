@@ -83,21 +83,19 @@ class hawkcore(object):
           try:
              ndata = json.loads(data)
           except ValueError:
-             self.debug()
+             #self.debug()
              self.reSession()
              self.login(self.user,self.passw)
              return 0
           if "status" in ndata:
               if ndata["status"] == "success":
-                 return ndata["results"]                
-              elif ndata["status"] == "failure":
+                 return ndata["results"]
+              if ndata["status"] == "failure":
                   if ndata["details"] == "Invalid session, unable to continue.":
                      print 'Hawk Failure: geting new session'
                      self.debug()
                      self.reSession()
                      self.login(self.user,self.passw)
-
-                     #print 'Hawk Failure',str(ndata)
                   return 0
           else:
               return 0
