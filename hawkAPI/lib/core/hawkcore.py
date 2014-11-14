@@ -138,7 +138,7 @@ class hawkcore(object):
                ndata = ""
                try:
                    ndata = r.json()
-               except requests.exceptions.ValueError,e:
+               except requests.exceptions.RequestException,e:
                    print e
  
                if len(ndata) > 1:
