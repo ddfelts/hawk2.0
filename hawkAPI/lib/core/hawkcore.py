@@ -136,8 +136,11 @@ class hawkcore(object):
                    print "Proper code not returned %s doing retry" % r.status_code
                    return 0
                ndata = ""
+               for i in r.iter_content(chunk_size=1024):
+                   print i
+                   ndata += i
                try:
-                   ndata = json.loads(r.content)
+                   ndata = json.loads(ndata)
                    #ndata = r.json().decode('utf-8')
                except requests.exceptions.RequestException,e:
                    return '''{"status":"None"}'''
