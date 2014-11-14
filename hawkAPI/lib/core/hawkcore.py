@@ -137,8 +137,8 @@ class hawkcore(object):
                    return 0
                ndata = ""
                for i in r.iter_content(chunk_size=1024):
-                   print i
-                   ndata += i
+                   
+                   ndata += i.encode('ascii',errors="ignore")
                try:
                    ndata = json.loads(ndata)
                    #ndata = r.json().decode('utf-8')
