@@ -137,11 +137,10 @@ class hawkcore(object):
                    return 0
                ndata = ""
                try:
-                   jdata = r.content.partition('(')[-1].rpartition(')')[0]
                    ndata = json.loads(jdata)
                    #ndata = r.json().decode('utf-8')
                except requests.exceptions.RequestException,e:
-                   print e
+                   return '''{"status":"None"}'''
  
                if len(ndata) > 1:
                   if self.debugit == "True":
