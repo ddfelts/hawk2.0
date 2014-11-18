@@ -139,12 +139,12 @@ class hawkcore(object):
                ndata ="" 
                #ndata = r.json()
                for i in r.iter_content(chunk_size=1024):
-                   #ndata += i
-                   ndata += i.replace('\n',"")
-                   #ndata += i.encode('ascii',errors="ignore")
+                   print i 
+                   ndata += i
+                   
                try:
                    ndata = json.loads(ndata)
-                   #ndata = r.json().decode('utf-8')
+                   
                except requests.exceptions.RequestException,e:
                    return '''{"status":"None"}'''
  
