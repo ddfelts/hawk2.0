@@ -142,12 +142,11 @@ class hawkcore(object):
                    #ndata += i
                    ndata += i.replace('\n',"")
                    #ndata += i.encode('ascii',errors="ignore")
-               #try:
-                   
-               #    ndata = json.loads(ndata)
+               try:
+                   ndata = json.loads(ndata)
                    #ndata = r.json().decode('utf-8')
-               #except requests.exceptions.RequestException,e:
-               #    return '''{"status":"None"}'''
+               except requests.exceptions.RequestException,e:
+                   return '''{"status":"None"}'''
  
                if len(ndata) > 1:
                   if self.debugit == "True":
