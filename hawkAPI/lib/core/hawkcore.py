@@ -130,23 +130,24 @@ class hawkcore(object):
       def doTest(self,api,data={}):
          url = "https://%s:8080/API/1.1/%s" % (self.server,api)
          try:
-             with closing(self.sess.post(url,data,verify=False,stream=True,allow_redirects=True)) as r:
+             #with closing(self.sess.post(url,data,verify=False,stream=True,allow_redirects=True)) as r:
+             with closing(self.sess.post(url,data,verify=False,allow_redirects=True)) as r:
                if r.status_code == requests.codes.ok:
                    pass
                else:
                    print "Proper code not returned %s doing retry" % r.status_code
                    return 0
                ndata ="" 
-               #ndata = r.json()
-               for i in r.iter_content(chunk_size=1024):
-                   print i 
-                   ndata += i
+               ndata = r.json()
+               #for i in r.iter_content(chunk_size=1024):
+               #    print i 
+               #    ndata += i
                    
-               try:
-                   ndata = json.loads(ndata)
+               #try:
+               #    ndata = json.loads(ndata)
                    
-               except requests.exceptions.RequestException,e:
-                   return '''{"status":"None"}'''
+               #except requests.exceptions.RequestException,e:
+               #    return '''{"status":"None"}'''
  
                if len(ndata) > 1:
                   if self.debugit == "True":
