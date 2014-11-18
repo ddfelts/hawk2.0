@@ -7,6 +7,7 @@ import time
 from socket import error as SocketError
 import errno
 from contextlib import closing
+import re
 
 class hawkcore(object):
 
@@ -137,9 +138,10 @@ class hawkcore(object):
                    return 0
                ndata = ""
                for i in r.iter_content(chunk_size=1024):
-                   
-                   ndata += i.encode('ascii',errors="ignore")
+                   ndata += re.escape(i)
+                   #ndata += i.encode('ascii',errors="ignore")
                try:
+                   
                    ndata = json.loads(ndata)
                    #ndata = r.json().decode('utf-8')
                except requests.exceptions.RequestException,e:
