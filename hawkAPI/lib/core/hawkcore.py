@@ -138,7 +138,7 @@ class hawkcore(object):
                    return 0
                ndata = ""
                for i in r.iter_content(chunk_size=1024):
-                   ndata += i
+                   ndata += i.group()[2:]
                    #ndata += i.encode('ascii',errors="ignore")
                try:
                    
