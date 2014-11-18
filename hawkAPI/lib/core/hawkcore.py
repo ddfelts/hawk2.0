@@ -138,6 +138,7 @@ class hawkcore(object):
                    print "Proper code not returned %s doing retry" % r.status_code
                    return 0
                ndata ="" 
+               print r.content()
                ndata = r.json()
                #for i in r.iter_content(chunk_size=1024):
                #    print i 
