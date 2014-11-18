@@ -138,7 +138,8 @@ class hawkcore(object):
                    return 0
                ndata = ""
                for i in r.iter_content(chunk_size=1024):
-                   ndata += i.replace('\"','"')
+                   ndata += i
+                   #ndata += i.replace('\"','"')
                    #ndata += i.encode('ascii',errors="ignore")
                try:
                    
