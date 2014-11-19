@@ -137,6 +137,8 @@ class hawkcore(object):
                    print "Proper code not returned %s doing retry" % r.status_code
                    return 0
                ndata ="" 
+               if self.debugit == "True":
+                   print r.text
                ndata = r.json()
                if len(ndata) > 1:
                   if self.debugit == "True":
