@@ -33,8 +33,14 @@ class hawkGraph:
             return self.tmpDir
 
         def removeDir(self):
-            shutil.rmtree(self.tmpDir)
-
+            a = 0
+            while a <= 1:
+                try:
+                   shutil.rmtree(self.tmpDir)
+                   a = 1
+                except:
+                   pass
+                
         def HBar(self,title,data):             
             chart = pygal.HorizontalBar(self.config)
             chart.title = "" 
