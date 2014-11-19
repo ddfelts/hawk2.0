@@ -34,13 +34,15 @@ hawk.setRetry(10)
 res = hawkapi(hawk)
 lib = hawklib(hawk)
 
-start = lib.getDateUtc("d",delta=opt.days)
-end = lib.getDateUtc()
+nstart = lib.getDateLocal("d",delta=opt.days).strftime("%Y-%m-%d")
+nend = lib.getDateLocal().strftime("%Y-%m-%d")
+end = str(start) + " 23:59:59"
+start = str(start) + " 00:00:00"
 client = opt.client
 lm = 10
 #Get Top Priority for the client
 main = []
-data = res.getAllIdsPriorityByGroup(str(start),str(end),str(client))
+data = res.getAllIdsPriorityByGroup(start,end,str(client))
 if data == "":
     main.append({"title":None,"data":None})
 else:
@@ -53,7 +55,7 @@ pdata = data
 
 #Get Top IP srcs by the group name
 main = []
-data = res.getTopIdsIpSrcByGroup(str(start),str(end),str(client),lm=10)
+data = res.getTopIdsIpSrcByGroup(start,end,str(client),lm=10)
 if data == None:
      main.append({"title":None,"data":None})
 else:
@@ -66,7 +68,7 @@ ipdata = data
 
 #Get Top IP Dst by the group name
 main = []
-data = res.getTopIdsIpDstByGroup(str(start),str(end),opt.client,lm=10)
+data = res.getTopIdsIpDstByGroup(start,end,opt.client,lm=10)
 if data == None:
      main.append({"title":None,"data":None})
 else:
@@ -78,7 +80,7 @@ dstdata = data
 
 #Get Top alerts by group name
 main = []
-data = res.getTopIdsAlertsByGroup(str(start),str(end),opt.client,lm=10)
+data = res.getTopIdsAlertsByGroup(start,end,opt.client,lm=10)
 if data == None:
    main.append({"title":None,"data":None})
 else:
