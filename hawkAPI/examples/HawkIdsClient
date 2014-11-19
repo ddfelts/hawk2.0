@@ -134,5 +134,10 @@ doc.addTable(adata,nkeys=keys)
 doc.addPageBreak()
 
 doc.savePdf()
-graph.removeDir() 
+while top == 1:
+    try:
+       top = graph.removeDir()
+    except:
+       pass
+
 sys.exit(1)
