@@ -8,10 +8,8 @@ from hawkAPI.lib.core.hawkapi import hawkapi
 from hawkAPI.lib.core.hawklib import hawklib
 from hawkAPI.lib.plugins.hawkGraph import hawkGraph
 from hawkAPI.lib.plugins.hawkPDF import hawkPDF
-
 from operator import itemgetter
 import argparse
-
 
 usage = 'HawkIdsClient -u uid -p pass -i hawkip -c client -d days -l directory'
 parser = argparse.ArgumentParser(description="PDF output by client for IDS alerts",epilog=usage)
@@ -28,10 +26,10 @@ if len(sys.argv) < 5:
     parser.print_help()
     sys.exit()
 opt = parser.parse_args()
-
 graph = hawkGraph()
 hawk = hawkcore(opt.server)
 hawk.login(opt.user,opt.passw)
+hawk.setRetry(10)
 #hawk.debug()
 res = hawkapi(hawk)
 lib = hawklib(hawk)
@@ -40,12 +38,14 @@ start = lib.getDateUtc("d",delta=opt.days)
 end = lib.getDateUtc()
 client = opt.client
 lm = 10
-
 #Get Top Priority for the client
 main = []
 data = res.getAllIdsPriorityByGroup(str(start),str(end),str(client))
-for i in data:
-    main.append({"title":i["priority"],
+if data == "":
+    main.append({"title":None,"data":None})
+else:
+    for i in data:
+        main.append({"title":i["priority"],
                  "data":int(i["priority_count"])})   
 graph.HBar("Priority",main)
 pdata = data
@@ -54,8 +54,11 @@ pdata = data
 #Get Top IP srcs by the group name
 main = []
 data = res.getTopIdsIpSrcByGroup(str(start),str(end),str(client),lm=10)
-for i in data:
-     main.append({"title":i["ip_src"],
+if data == None:
+     main.append({"title":None,"data":None})
+else:
+     for i in data:
+        main.append({"title":i["ip_src"],
                  "data":int(i["ip_src_count"])})
 graph.Pie("Top_IP_Source",main)
 ipdata = data
@@ -64,8 +67,11 @@ ipdata = data
 #Get Top IP Dst by the group name
 main = []
 data = res.getTopIdsIpDstByGroup(str(start),str(end),opt.client,lm=10)
-for i in data:
-     main.append({"title":i["ip_dst"],
+if data == None:
+     main.append({"title":None,"data":None})
+else:
+     for i in data:
+        main.append({"title":i["ip_dst"],
                  "data":int(i["ip_dst_count"])})
 graph.Pie("Top_IP_Dst",main)
 dstdata = data
@@ -73,8 +79,11 @@ dstdata = data
 #Get Top alerts by group name
 main = []
 data = res.getTopIdsAlertsByGroup(str(start),str(end),opt.client,lm=10)
-for i in data:
-    main.append({"title":i["alert_name"],
+if data == None:
+   main.append({"title":None,"data":None})
+else:
+   for i in data:
+       main.append({"title":i["alert_name"],
                  "data":int(i["alert_name_count"])})
 graph.HBar("Top_Ten_Alerts",main)
 adata = data
