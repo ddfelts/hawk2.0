@@ -139,10 +139,7 @@ class hawkcore(object):
                ndata ="" 
                if self.debugit == "True":
                    print r.text
-               try:
-                   ndata = r.json()
-               except:
-                   print r.text
+               ndata = r.json()
                if len(ndata) > 1:
                   if self.debugit == "True":
                      print ndata
