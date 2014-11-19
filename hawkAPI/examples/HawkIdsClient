@@ -35,9 +35,9 @@ res = hawkapi(hawk)
 lib = hawklib(hawk)
 
 nstart = lib.getDateLocal("d",delta=opt.days).strftime("%Y-%m-%d")
-nend = lib.getDateLocal().strftime("%Y-%m-%d")
-end = str(start) + " 23:59:59"
-start = str(start) + " 00:00:00"
+#nend = lib.getDateLocal().strftime("%Y-%m-%d")
+end = str(nstart) + " 23:59:59"
+start = str(nstart) + " 00:00:00"
 client = opt.client
 lm = 10
 #Get Top Priority for the client
