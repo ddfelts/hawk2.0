@@ -28,6 +28,8 @@ Download or clone the repo.
 <h2>Windows Install:</h2>
 
 Install <ahref="https://www.python.org/downloads/windows/">Python2.7</a>
+Make sure it is the 32bit version.  The 64bit version has issues with
+adding registry settings.
 
 Add Python to your path:
 
@@ -52,6 +54,10 @@ You will need to install <a href="https://xlsxwriter.readthedocs.org">Xlsxwriter
 You will need to install <a href="http://www.reportlab.com/">ReportLab</a>
 
       pip install reportlab
+
+You will need to install the pygtk pygobject and pycario.  Go to
+<a>www.Lfd.uci.edu/~gohlke/pythonlibs/#pygtk</a> and get the libraries
+and install them.
 
 You will need to install <a href="http://pygal.org/">PyGal</a> and lxml for graphics
   
