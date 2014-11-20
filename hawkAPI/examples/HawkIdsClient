@@ -132,7 +132,7 @@ doc.addImage("%s/Top_Ten_Alerts.png" % graph.getDir(),450,200)
 keys = ["alert_name","alert_name_count"]
 doc.addTable(adata,nkeys=keys)
 doc.addPageBreak()
-
+top = 1 
 doc.savePdf()
 while top == 1:
     try:
