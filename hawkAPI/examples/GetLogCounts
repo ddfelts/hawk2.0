@@ -1,3 +1,4 @@
+#!/usr/bin/python
 from hawkAPI.lib.core.hawkcore import hawkcore 
 from hawkAPI.lib.core.hawkapi import hawkapi
 from hawkAPI.lib.core.hawklib import hawklib
