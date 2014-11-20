@@ -1,0 +1,38 @@
+from hawkAPI.lib.core.hawkcore import hawkcore 
+from hawkAPI.lib.core.hawkapi import hawkapi
+from hawkAPI.lib.core.hawklib import hawklib
+from hawkAPI.lib.plugins.hawkXLSX import hawkXLSX
+from datetime import datetime
+import sys
+import os
+import string
+import argparse
+
+usage = 'GetLogCounts -u uid -p pass -i hawkip -c client -d days -l directory'
+parser = argparse.ArgumentParser(description="Logcount report",epilog=usage)
+parser.add_argument("-u","--user",help="Username",type=str,required=True)
+parser.add_argument("-p","--passw",help="Password",type=str,required=True)
+parser.add_argument("-i","--server",help="The hawk server IP",type=str,required=True)
+parser.add_argument("-c","--client",help="Client name",type=str,required=True)
+parser.add_argument("-d","--days",help="Number of Days",type=int,required=True)
+parser.add_argument("-l","--dir",help="location to store",type=str,required=True)
+
+if len(sys.argv) < 5:
+   parser.print_help()
+   sys.exit()
+opt = parser.parse_args()
+hawk = hawkcore(opt.server)
+hawk.setRetry(10)
+hawk.login(opt.user,opt.passw)
+#hawk.debug()
+res = hawkapi(hawk)
+lib = hawklib(hawk)
+start = lib.getDateUtc('d',delta=opt.days)
+end = lib.getDateUtc()
+f = res.getLogCount(start,end,opt.client)
+nameit = opt.dir + opt.client + "-logcount.xlsx"
+book = hawkXLSX(nameit,hawk)
+key = ["resource_addr","group_name","alert_name_count"]
+book.addpage("logcount",f,nkeys=key)
+book.close()
+hawk.logout()

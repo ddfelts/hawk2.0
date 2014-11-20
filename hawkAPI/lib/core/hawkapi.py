@@ -575,7 +575,7 @@ class hawkapi():
              ndata.update({"where[2]":"class_type = '%s'" % ct})
           return self.hawk.getEvents(ndata)
 
-      def searchCIDRSrcbyGroup(self,start,end,cidr,lm=0):
+      def searchCIDRSrcByGroup(self,start,end,cidr,group,lm=0):
            ndata = {"column[0]":"ip_src",
                     "column[1]":"ip_dst",
                     "column[2]":"alert_name",
@@ -587,13 +587,14 @@ class hawkapi():
                     "column[8]":"priority",
                     "column[9]":"group_name",
                     "where[0]":"ip_src = regex '%s'" % cidr,
+                    "where[1]":"group_name = '%s'" % group,
                     "begin":"%s" % start,
                     "end":"%s" % end}
            if lm != 0:
               ndata.update({"limit":"%s" % lm})
            return self.hawk.getEvents(ndata)
 
-      def searchCIDRDstbyGroup(self,start,end,cidr,lm=0):
+      def searchCIDRDstByGroup(self,start,end,cidr,group,lm=0):
            ndata = {"column[0]":"ip_src",
                     "column[1]":"ip_dst",
                     "column[2]":"alert_name",
@@ -605,6 +606,7 @@ class hawkapi():
                     "column[8]":"priority",
                     "column[9]":"group_name",
                     "where[0]":"ip_dst = regex '%s'" % cidr,
+                    "where[1]":"group_name = '%s'" % group,
                     "begin":"%s" % start,
                     "end":"%s" % end}
            if lm != 0:
