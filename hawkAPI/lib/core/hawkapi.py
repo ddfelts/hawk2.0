@@ -586,7 +586,7 @@ class hawkapi():
                     "column[7]":"ip_sport",
                     "column[8]":"priority",
                     "column[9]":"group_name",
-                    "where[0]":"ip_src = regex '%s'" % cidr,
+                    "where[0]":'ip_src regex "%s")' % cidr,
                     "where[1]":"group_name = '%s'" % group,
                     "begin":"%s" % start,
                     "end":"%s" % end}
@@ -605,7 +605,7 @@ class hawkapi():
                     "column[7]":"ip_sport",
                     "column[8]":"priority",
                     "column[9]":"group_name",
-                    "where[0]":"ip_dst = regex '%s'" % cidr,
+                    "where[0]":'ip_dst regex "/%s/"' % cidr,
                     "where[1]":"group_name = '%s'" % group,
                     "begin":"%s" % start,
                     "end":"%s" % end}
@@ -789,6 +789,17 @@ class hawkapi():
            elif tp == "action":
               ndata.update({"where[2]":"audit_user_action = ('failure')"})
            return self.hawk.getEvents(ndata)
+
+      def getLogCount(self,start,end,client):
+          ndata = {"column[0]":"resource_addr",
+                   "column[1]":"group_name",
+                   "column[2]":"count alert_name",
+                   "where[0]":"group_name = '%s'" % client,
+                   "order_by":"alert_name_count DESC",
+                   "group_by":"resource_addr",
+                   "begin":"%s" % start,
+                   "end":"%s" % end}
+          return self.hawk.getEvents(ndata)
 
       def getTopVulns(self,client,lm=10):
           ndata = {"column[0]":"vuln_name",
