@@ -180,7 +180,23 @@ class hawkcore(object):
           else:
              url = "group?%s" % data
           data = self.doGet(url)
-          return self.checkData(data)
+          d = self.checkData(data)
+          b = []
+          if d != 0:
+              if d["children"] != False:
+                  for i in d["children"]:
+                      if i["parent"] in b:
+                          pass
+                      else:
+                          b.append(i["parent"])
+                      if i["name"] in b:
+                          pass
+                      else:
+                          b.append(i["name"])
+              else:
+                 if d["name"] not in b:
+                    b.append(d["name"])
+          return b
 
       def getEvents(self,data):
          api = "search/events"
