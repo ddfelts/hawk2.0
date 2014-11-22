@@ -161,7 +161,7 @@ class hawkcore(object):
 
       def getShardStats(self):
           url = "shards/stats"
-          data = json.loads(self.doGet(url))
+          data = self.doGet(url)
           return self.checkData(data)
 
       def getAudit(self,data={}):
@@ -171,15 +171,15 @@ class hawkcore(object):
 
       def getShardLists(self):
           url = "shards/list"
-          data = json.loads(self.doGet(url))
+          data = self.doGet(url)
           return self.checkData(data)         
 
       def getGroups(self,data=""):
           if data == "":
              url = "group"
           else:
-             url = "group/%s" % data
-          data = json.loads(self.doGet(url))
+             url = "group?%s" % data
+          data = self.doGet(url)
           return self.checkData(data)
 
       def getEvents(self,data):

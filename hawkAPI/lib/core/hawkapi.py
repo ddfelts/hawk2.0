@@ -853,3 +853,7 @@ class hawkapi():
                    "group_by":"resource_name",
                    "where[0]":"resource_group = ('%s')" % client}
           return self.hawk.getDevices(ndata)
+
+      def getGroupsByGroup(self,client):
+          ndata = "name=%s" % client
+          return self.hawk.getGroups(ndata)
