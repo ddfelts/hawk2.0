@@ -174,8 +174,11 @@ class hawkcore(object):
           data = json.loads(self.doGet(url))
           return self.checkData(data)         
 
-      def getGroups(self):
-          url = "group"
+      def getGroups(self,data=""):
+          if data == "":
+             url = "group"
+          else:
+             url = "group/%s" % data
           data = json.loads(self.doGet(url))
           return self.checkData(data)
 
