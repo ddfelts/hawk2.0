@@ -28,12 +28,16 @@ hawk.login(opt.user,opt.passw)
 #hawk.debug()
 res = hawkapi(hawk)
 lib = hawklib(hawk)
+groups = res.getGroupsByGroup(opt.client)
 start = lib.getDateUtc('d',delta=opt.days)
 end = lib.getDateUtc()
-f = res.getLogCount(start,end,opt.client)
 nameit = opt.dir + opt.client + "-logcount.xlsx"
 book = hawkXLSX(nameit,hawk)
-key = ["resource_addr","group_name","alert_name_count"]
-book.addpage("logcount",f,nkeys=key)
+for i in groups:
+    print i
+    f = res.getLogCount(start,end,i)
+    key = ["resource_addr","group_name","alert_name_count"]
+    book.addpage(i,f,nkeys=key)
+    f = ""
 book.close()
 hawk.logout()
