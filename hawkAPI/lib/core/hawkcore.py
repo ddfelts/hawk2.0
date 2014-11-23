@@ -130,7 +130,7 @@ class hawkcore(object):
       def doTest(self,api,data={}):
          url = "https://%s:8080/API/1.1/%s" % (self.server,api)
          try:
-             with closing(self.sess.post(url,data,verify=False,strem=True,allow_redirects=True)) as r:
+             with closing(self.sess.post(url,data,verify=False,stream=True,allow_redirects=True)) as r:
                if r.status_code == requests.codes.ok:
                    pass
                else:
