@@ -17,8 +17,8 @@ class hawkcore(object):
          self.debugit = "False"
          self.retry = 0
          self.setretry = 5
-         logging.getLogger("requests").setLevel(logging.WARNING)
-
+         logging.getLogger("requests").setLevel(logging.CRITICAL)
+         logging.getLogger("urllib3").setLevel(logging.CRITICAL)
       def reSession(self):
           self.sess = requests.session()
 
