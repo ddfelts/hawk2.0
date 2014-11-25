@@ -72,20 +72,21 @@ for i in alldates:
               payload = "None"
           else:
               payload = b["payload"]
-          if "ip_sport" in mdata:
+          if "ip_sport" in b:
               if b["ip_sport"] == None :
                  ip_sport = "None"
               else:
                  ip_sport = b["ip_sport"]
           else:
               ip_sport = "None"
-          if "ip_dport" in mdata:
+          if "ip_dport" in b:
               if b["ip_dport"] == None:
                  ip_dport = "None"
               else:
                  ip_dport = b["ip_dport"]
           else:
               ip_dport = "None"
+
           cur.execute('''INSERT INTO idsalerts (date,ip_src,ip_dst,alert_name,payload,priority,ip_sport,ip_dport) VALUES(?,?,?,?,?,?,?,?)''' ,(b["date_added"],src,dst,b["alert_name"],payload,b["priority"],ip_sport,ip_dport))
           con.commit()
 cur.execute("SELECT * FROM idsalerts ORDER BY date(date) DESC") 
