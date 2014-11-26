@@ -178,29 +178,34 @@ class hawkcore(object):
           data = self.doGet(url)
           return self.checkData(data)         
 
-      def getGroups(self,data=""):
-          if data == "":
+
+      def traverse(self,o):
+          res = []
+          for b in o:
+            if b["children"] == False:
+              res.append(b["key"])
+            else:
+              res.append(b["key"])
+              res.extend(self.traverse(b["children"]))
+          return res
+
+      def getGroups(self,data):
+          if data == None:
              url = "group"
           else:
              url = "group?%s" % data
-          data = self.doGet(url)
-          d = self.checkData(data)
-          b = []
-          if d != 0:
-              if d["children"] != False:
-                  for i in d["children"]:
-                      if i["parent"] in b:
-                          pass
-                      else:
-                          b.append(i["parent"])
-                      if i["name"] in b:
-                          pass
-                      else:
-                          b.append(i["name"])
+          ndata = self.doGet(url)
+          ndata = self.checkData(ndata)
+          if not ndata:
+              return 0
+          else:
+              fdata = self.traverse(ndata["children"])
+              if data == None:
+                  return fdata
               else:
-                 if d["name"] not in b:
-                    b.append(d["name"])
-          return b
+                  fdata.append(data[5:])
+                  return fdata
+
 
       def getEvents(self,data):
          api = "search/events"

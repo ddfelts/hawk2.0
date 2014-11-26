@@ -794,6 +794,7 @@ class hawkapi():
           ndata = {"column[0]":"resource_addr",
                    "column[1]":"group_name",
                    "column[2]":"count alert_name",
+                   "column[3]":"alert_name",
                    "where[0]":"group_name = '%s'" % client,
                    "order_by":"alert_name_count DESC",
                    "group_by":"resource_addr",
@@ -853,6 +854,9 @@ class hawkapi():
                    "group_by":"resource_name",
                    "where[0]":"resource_group = ('%s')" % client}
           return self.hawk.getDevices(ndata)
+
+      def getGroups(self):
+          return self.hawk.getGroups(None)
 
       def getGroupsByGroup(self,client):
           ndata = "name=%s" % client
