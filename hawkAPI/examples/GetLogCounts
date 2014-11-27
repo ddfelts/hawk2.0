@@ -36,6 +36,7 @@ book = hawkXLSX(nameit,hawk)
 for i in groups:
     print i
     f = res.getLogCount(start,end,i)
+    print f
     key = ["resource_addr","group_name","alert_name_count"]
     book.addpage(i,f,nkeys=key)
     f = ""
