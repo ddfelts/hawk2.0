@@ -797,7 +797,7 @@ class hawkapi():
                    "column[3]":"alert_name",
                    "where[0]":"group_name = '%s'" % client,
                    "order_by":"alert_name_count DESC",
-                   "group_by":"resource_addr",
+                   "group_by":"resource_addr,alert_name_count",
                    "begin":"%s" % start,
                    "end":"%s" % end}
           return self.hawk.getEvents(ndata)
