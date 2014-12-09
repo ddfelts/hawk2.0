@@ -151,7 +151,7 @@ class hawkcore(object):
                    data += i
                try:
                   ndata = json.loads(data)
-               except requests.exception.RequestException as e:
+               except requests.exceptions.RequestException as e:
                   return 0
                #ndata = r.json()
                if len(ndata) > 1:
