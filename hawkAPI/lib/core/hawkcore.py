@@ -153,6 +153,7 @@ class hawkcore(object):
                   ndata = json.loads(data)
                except:
                   self.newdata(data)
+                  return 1
                #ndata = r.json()
                if len(ndata) > 1:
                   if self.debugit == "True":
