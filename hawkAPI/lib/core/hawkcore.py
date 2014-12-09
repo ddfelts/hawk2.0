@@ -147,8 +147,8 @@ class hawkcore(object):
                data ="" 
                if self.debugit == "True":
                    print r.text
-               #for i in r.iter_content(chunk_size=1046):
-               #    data += i
+               for i in r.iter_content(chunk_size=1046):
+                   data += i
                ndata = json.loads(data)
                #ndata = r.json()
                if len(ndata) > 1:
