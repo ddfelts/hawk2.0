@@ -17,6 +17,7 @@ class hawkcore(object):
          self.debugit = "False"
          self.retry = 0
          self.setretry = 5
+         self.nd = []
          logging.getLogger("requests").setLevel(logging.CRITICAL)
          logging.getLogger("urllib3").setLevel(logging.CRITICAL)
       def reSession(self):
@@ -127,6 +128,12 @@ class hawkcore(object):
           else:
               print "Failed %s retrys" % str(self.retry)
               sys.exit(1)
+ 
+      def newdata(self,data):
+          self.nd.append(data)
+
+      def getnewdata(self):
+          return self.nd
 
       def doTest(self,api,data={}):
          url = "https://%s:8080/API/1.1/%s" % (self.server,api)
@@ -140,9 +147,12 @@ class hawkcore(object):
                data ="" 
                if self.debugit == "True":
                    print r.text
-               for i in r.iter_content(chunk_size=1046):
-                   data += i
-               ndata = json.loads(data)
+               #for i in r.iter_content(chunk_size=1046):
+               #    data += i
+               try:
+                  ndata = json.loads(data)
+               except:
+                  self.newdata(data)
                #ndata = r.json()
                if len(ndata) > 1:
                   if self.debugit == "True":
