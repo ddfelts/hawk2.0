@@ -149,7 +149,10 @@ class hawkcore(object):
                    print r.text
                for i in r.iter_content(chunk_size=1046):
                    data += i
-               ndata = json.loads(data)
+               try:
+                  ndata = json.loads(data)
+               except requests.exception.RequestException as e:
+                  return 0
                #ndata = r.json()
                if len(ndata) > 1:
                   if self.debugit == "True":
