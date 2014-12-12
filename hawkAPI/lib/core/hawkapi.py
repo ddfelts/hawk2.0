@@ -399,6 +399,9 @@ class hawkapi():
                    "column[5]":"group_name",
                    "column[6]":"geoip_name ip_src",
                    "column[7]":"geoip_name ip_dst",
+                   "column[8]":"ip_sport",
+                   "column[9]":"ip_dport",
+                   "column[10]":"payload",
                    #"order_by":"date_added",
                    "begin":"%s" % start,
                    "end":"%s" % end}
@@ -419,6 +422,8 @@ class hawkapi():
                    "column[5]":"group_name",
                    "column[6]":"geoip_name ip_src",
                    "column[7]":"geoip_name ip_dst",
+                   "column[8]":"ip_sport",
+                   "column[9]":"ip_dport",
                    #"order_by":"date_added",
                    "where[0]":"group_name = '%s'" % group,
                    "begin":"%s" % start,
