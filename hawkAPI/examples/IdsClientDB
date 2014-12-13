@@ -1,21 +1,16 @@
 #!/usr/bin/python
-
 import sys
 import os
 import string
 from hawkAPI.lib.core.hawkcore import hawkcore 
-#from hawkAPI.lib.core.hawkapi import hawkapi
-#from hawkAPI.lib.core.hawklib import hawklib
 from hawkAPI.lib.plugins.hawkGraph import hawkGraph
 from hawkAPI.lib.plugins.hawkPDF import hawkPDF
-import sqlite3 as lite
-from operator import itemgetter
 import argparse
+from pymongo import *
+from bson.son import SON
 
-
-usage = 'IdsClient -d "database" -l dir -o -a -s'
+usage = 'IdsClient -c client -l dir -o -a -b'
 parser = argparse.ArgumentParser(description="PDF output by client for IDS alerts",epilog=usage)
-parser.add_argument("-d","--db",help="Database",type=str,required=True)
 parser.add_argument("-l","--dir",help="location to store",type=str,required=True)
 parser.add_argument("-o","--logo",help="path to logo",type=str,required=False)
 parser.add_argument("-a","--plogo",help="path to page logo",type=str,required=False)
@@ -27,116 +22,132 @@ if len(sys.argv) < 3:
     sys.exit()
 opt = parser.parse_args()
 
-con = lite.connect(opt.db)
-cur = con.cursor()
 hawk = hawkcore(None)
 graph = hawkGraph()
+client = MongoClient('localhost', 27017)
+db = client["%s" % opt.client]
+col = db.alerts
 
-cur.execute("SELECT * FROM idsalerts")
-res = cur.fetchone()
-t = res[1]
-start =  t[0:10] + " 00:00:00"
-end = t[0:10] + " 23:59:59"
 
-cur.execute("SELECT ip_src,count(ip_src) FROM idsalerts group by ip_src ORDER BY count(ip_src) DESC LIMIT 10")
-res = cur.fetchall()
+start = col.find_one()
+nstart = start["date"]
+nstart = nstart[0:10] + " 00:00:00"
+end = col.find().sort('date',-1).limit(1)
+for i in end:
+    nend = i["date"]
+fend = nend[0:10] + " 23:55:55"
+
+pipe = [{"$group":{"_id":"$src","count":{"$sum":1}}},
+        {"$sort":SON([("count",-1),("_id",-1)])},
+        {"$limit":10}]
+srcs = col.aggregate(pipe)
 main = []
 fin = []
-for i in res:
-    main.append({"title":i[0],
-                 "data":int(i[1])})   
-    tax = {"ip_src":i[0],
-           "ip_src_count":i[1]}
+for i in srcs["result"]:
+    main.append({"title":i["_id"],
+                 "data":int(i["count"])})   
+    tax = {"ip_src":i["_id"],
+           "ip_src_count":i["count"]}
     fin.append(tax)
     tax = ""
 graph.HBar("Top_IP_Source",main)
 ipdata = fin
 
-#Get Top IP Dst by the group name
+pipe = [{"$group":{"_id":"$dst","count":{"$sum":1}}},
+        {"$sort":SON([("count",-1),("_id",-1)])},
+        {"$limit":10}]
+srcs = col.aggregate(pipe)
 main = []
 fin = []
-cur.execute("SELECT ip_dst,count(ip_dst) FROM idsalerts GROUP BY ip_dst ORDER BY count(ip_dst) DESC LIMIT 10")
-res = cur.fetchall()
-for i in res:
-     main.append({"title":i[0],
-                 "data":int(i[1])})
-     tax = {"ip_dst":i[0],
-            "ip_dst_count":i[1]}
-     fin.append(tax)
-     tax = ""
+
+for i in srcs["result"]:
+    main.append({"title":i["_id"],
+                 "data":int(i["count"])})   
+    tax = {"ip_dst":i["_id"],
+           "ip_dst_count":i["count"]}
+    fin.append(tax)
+    tax = ""
 graph.Pie("Top_IP_Dst",main)
 dstdata = fin
 
+pipe = [{"$group":{"_id":"$an","count":{"$sum":1}}},
+        {"$sort":SON([("count",-1),("_id",-1)])},
+        {"$limit":10}]
+srcs = col.aggregate(pipe)
 #Get Top alerts by group name
 main = []
 fin = []
-cur.execute("SELECT alert_name,count(alert_name) FROM idsalerts GROUP BY alert_name ORDER BY count(alert_name) DESC LIMIT 10")
-res = cur.fetchall()
-for i in res:
-    main.append({"title":i[0],
-                 "data":int(i[1])})
-    tax = {"alert_name":i[0],
-           "alert_name_count":i[1]}
+for i in srcs["result"]:
+    main.append({"title":i["_id"],
+                 "data":i["count"]})   
+    tax = {"alert_name":i["_id"],
+           "alert_name_count":i["count"]}
     fin.append(tax)
-    tax=""
+    tax = ""
 graph.HBar("Top_Ten_Alerts",main)
 adata = fin
 
+pipe = [{"$group":{"_id":"$pri","count":{"$sum":1}}},
+        {"$sort":SON([("count",-1),("_id",-1)])},
+        {"$limit":5}]
+srcs = col.aggregate(pipe)
 main = []
 fin = []
-cur.execute("SELECT priority,count(priority) FROM idsalerts GROUP BY priority ORDER BY count(priority) DESC LIMIT 5")
-res = cur.fetchall()
-for i in res:
-   main.append({"title":i[0],
-                "data":int(i[1])})
-   tax = {"priority":i[0],
-          "priority_count":i[1]}
-   fin.append(tax)
-   tax=""
+for i in srcs["result"]:
+    main.append({"title":str(i["_id"]),
+                 "data":i["count"]})   
+    tax = {"priority":i["_id"],
+           "priority_count":i["count"]}
+    fin.append(tax)
+    tax = ""
 graph.HBar("Top_5_Priority",main)
 pdata = fin
 
 
+pipe = [{"$group":{"_id":"$ipsport","count":{"$sum":1}}},
+        {"$sort":SON([("count",-1),("_id",-1)])},
+        {"$limit":5}]
+srcs = col.aggregate(pipe)
 main = []
 fin = []
-cur.execute("SELECT ip_sport,count(ip_sport) FROM idsalerts GROUP BY ip_sport ORDER BY count(ip_sport) DESC LIMIT 10")
-res = cur.fetchall()
-for i in res:
-    main.append({"title":i[0],
-                 "data":int(i[1])})
-    tax = {"ip_sport":i[0],
-           "ip_sport_count":i[1]}
+for i in srcs["result"]:
+    main.append({"title":str(i["_id"]),
+                 "data":i["count"]})   
+    tax = {"ip_sport":i["_id"],
+           "ip_sport_count":i["count"]}
     fin.append(tax)
-    tax=""
+    tax = ""
 graph.HBar("Top_10_SrcPort",main)
 sportdata = fin
 
+
+pipe = [{"$group":{"_id":"$ipdport","count":{"$sum":1}}},
+        {"$sort":SON([("count",-1),("_id",-1)])},
+        {"$limit":5}]
+srcs = col.aggregate(pipe)
 main = []
 fin = []
-cur.execute("SELECT ip_dport,count(ip_dport) FROM idsalerts GROUP BY ip_dport ORDER BY count(ip_dport) DESC LIMIT 10")
-res = cur.fetchall()
-for i in res:
-    main.append({"title":i[0],
-                 "data":int(i[1])})
-    tax = {"ip_dport":i[0],
-           "ip_dport_count":i[1]}
+for i in srcs["result"]:
+    main.append({"title":str(i["_id"]),
+                 "data":i["count"]})   
+    tax = {"ip_dport":i["_id"],
+           "ip_dport_count":i["count"]}
     fin.append(tax)
-    tax=""
+    tax = ""
 graph.HBar("Top_10_DstPort",main)
 dportdata = fin
 
+srcs = col.find()
 main = []
 fin = []
-cur.execute("SELECT * FROM idsalerts ORDER BY date ASC")
-res = cur.fetchall()
-for i in res:
-    tax = {"date":i[1],
-           "ip_src":i[2],
-           "ip_sport":i[7],
-           "ip_dst":i[3],
-           "ip_dport":i[8],
-           "alert_name":i[4],
-           "priority":i[6]}
+for i in srcs:
+    tax = {"date":i["date"],
+           "ip_src":i["src"],
+           "ip_sport":i["ipsport"],
+           "ip_dst":i["dst"],
+           "ip_dport":i["ipdport"],
+           "alert_name":i["an"],
+           "priority":i["pri"]}
     fin.append(tax)
     tax=""
 alldata = fin
@@ -145,7 +156,7 @@ nameit = opt.dir + opt.client + "-ids.pdf"
 doc = hawkPDF(nameit,hawk)
 #doc.setPageLetter()
 doc.setTitle("IDS Report")
-doc.setDate(str(start),str(end))
+doc.setDate(str(nstart),str(fend))
 doc.setClientName(opt.client)
 if opt.logo:
    doc.setClientImage(opt.logo)
