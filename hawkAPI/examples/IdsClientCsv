@@ -23,6 +23,7 @@ hawk = hawkcore(None)
 client = MongoClient('localhost', 27017)
 db = client["%s" % opt.client]
 col = db.alerts
+col.create_index([("date",DESCENDING)])
 srcs = col.find().sort('date')
 fin = []
 for i in srcs:
