@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from hawkAPI.lib.core.hawkcore import hawkcore 
 from hawkAPI.lib.core.hawkapi import hawkapi
 from hawkAPI.lib.core.hawklib import hawklib
@@ -55,6 +57,7 @@ def adddb(mq,col):
                   "dst":dst,
                   "ipsport":ip_sport,
                   "ipdport":ip_dport,
+                  "pri":priority,
                   "an":alert_name,
                   "pl":payload}
 
