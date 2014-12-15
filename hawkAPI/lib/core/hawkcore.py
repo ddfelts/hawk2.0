@@ -8,18 +8,26 @@ from socket import error as SocketError
 import errno
 from contextlib import closing
 import re
+import random
 
 class hawkcore(object):
 
       def __init__(self,server):
-         self.sess = requests.session()
+         self.allsessions = []
+         #self.sess = requests.session()
          self.server = server
+         for i in self.server:
+             data = {"server":i,"sess":requests.session()}
+             self.allsessions.append(data)
+             data = ""
+
          self.debugit = "False"
          self.retry = 0
          self.setretry = 5
          self.nd = []
          logging.getLogger("requests").setLevel(logging.CRITICAL)
          logging.getLogger("urllib3").setLevel(logging.CRITICAL)
+
       def reSession(self):
           self.sess = requests.session()
 
@@ -57,9 +65,10 @@ class hawkcore(object):
       def login(self,user,passw):
          self.setCred(user,passw)
          data = {"username":user,"password":passw,"secure":"false"}
-         url = "https://%s:8080/API/1.1/login" % self.server
          try:
-              self.sess.post(url,data,verify=False,allow_redirects=True)
+              for i in self.allsessions:
+                  url = "https://%s:8080/API/1.1/login" % i["server"]
+                  i["sess"].post(url,data,verify=False,allow_redirects=True)
          except requests.exceptions.ConnectionError:
               print "Connection Error during login"
               sys.exit(1)
@@ -68,9 +77,10 @@ class hawkcore(object):
               sys.exit(1)    
 
       def logout(self):
-         url = "https://%s:8080/API/1.1/logout" % self.server
-         r = self.sess.get(url,verify=False) 
-         return "true"
+          for i in self.allsessions:
+              url = "https://%s:8080/API/1.1/logout" % i["server"]
+              r = i["sess"].get(url,verify=False) 
+          return "true"
 
       def callError(self,a,b):
           raise Exception(a,b)
@@ -136,9 +146,11 @@ class hawkcore(object):
           return self.nd
 
       def doTest(self,api,data={}):
-         url = "https://%s:8080/API/1.1/%s" % (self.server,api)
+         #url = "https://%s:8080/API/1.1/%s" % (self.server,api)
          try:
-             with closing(self.sess.post(url,data,verify=False,stream=True,allow_redirects=True)) as r:
+             i = random.choice(self.allsessions)
+             url = "https://%s:8080/API/1.1/%s" % (i["server"],api)
+             with closing(i["sess"].post(url,data,verify=False,stream=True,allow_redirects=True)) as r:
                if r.status_code == requests.codes.ok:
                    pass
                else:
