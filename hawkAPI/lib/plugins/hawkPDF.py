@@ -11,7 +11,7 @@ from reportlab.lib.styles import ParagraphStyle as PS
 from reportlab.platypus.tableofcontents import TableOfContents
 
 
-class hawkPDF2:
+class hawkPDF:
 
       def __init__(self,doc):
           self.docname = doc
@@ -23,13 +23,13 @@ class hawkPDF2:
                                  self.doc.height,
                                  self.doc.width,
                                  id="Normal")
-          
+
           self.portrait = Frame(self.doc.leftMargin,
                                 self.doc.bottomMargin,
                                 self.doc.width,
                                 self.doc.height,
                                 id="Normal")
-          
+
           self.tportrait = Frame(self.doc.leftMargin,
                                 self.doc.bottomMargin,
                                 self.doc.width,
@@ -51,16 +51,16 @@ class hawkPDF2:
 
 
           self.toc = TableOfContents()
-	  self.toc.levelStyles = [  
-	      PS(fontName='Times-Bold', fontSize=14, name='TOCHeading1', leftIndent=20, firstLineIndent=-20, spaceBefore=10, leading=16),  
-	      PS(fontSize=12, name='TOCHeading2', leftIndent=40, firstLineIndent=-20, spaceBefore=5, leading=12),  
-	  ]  
+	      self.toc.levelStyles = [  
+	            PS(fontName='Times-Bold', fontSize=14, name='TOCHeading1', leftIndent=20, firstLineIndent=-20, spaceBefore=10, leading=16),  
+	            PS(fontSize=12, name='TOCHeading2', leftIndent=40, firstLineIndent=-20, spaceBefore=5, leading=12),  
+	            ]  
 
 
       def addTOC(self, page):
-	  self.toc.beforeBuild()
+	      self.toc.beforeBuild()
           self.story.insert(page, NextPageTemplate('portrait'))
-	  self.story.insert(page+1, self.toc);
+	      self.story.insert(page+1, self.toc);
           self.story.insert(page+2, PageBreak())
 
       def setCImage(self,image):
@@ -78,7 +78,7 @@ class hawkPDF2:
       def setDates(self,start,end):
           self.startDate = start
           self.endDate = end
-   
+
       def setClient(self,text):
           self.client = text
 
@@ -92,7 +92,7 @@ class hawkPDF2:
           canvas.drawString(inch, 0.75 * inch, "Page %d" % doc.page)
           canvas.drawString(inch * 1.5, 0.60 * inch, "Confidential Document.")
           canvas.restoreState()
-          
+
       def make_landscape(self,canvas,doc):
           canvas.saveState()
           canvas.setFont("Times-Roman",10)
@@ -119,20 +119,12 @@ class hawkPDF2:
                 canvas.drawImage(self.cimage,2.0625 * inch,self.h-400,width=self.w/2,height=(self.w/2 * aspect))
           canvas.restoreState()
 
-
       def get_aspect(self,path):
           img = utils.ImageReader(path)
           iw,ih = img.getSize()
           aspect = ih / float(iw)
           return aspect
 
-
-      def createTemplates(self):
-          ttemplate = PageTemplate(id='tportrait',frames =self.tportrait, onPage=self.make_title_page)
-          ptemplate = PageTemplate(id='portrait',frames =self.portrait, onPage=self.make_portrait)
-          ltemplate = PageTemplate(id='landscape',frames =self.landscape, onPage=self.make_landscape)
-          self.doc.addPageTemplates([ttemplate,ptemplate,ltemplate])
-   
       def setPortrait(self):
           self.story.append(NextPageTemplate('portrait'))
           self.addPageBreak()
@@ -144,10 +136,10 @@ class hawkPDF2:
       def setDates(self,start,end):
           self.startDate = start
           self.endDate = end
-      
+
       def setCanvas(self,canvas):
           self.canvas = canvas  
-                 
+
       def addStory(self,text):
           t = Paragraph(text,self.styles["Normal"])
           self.story.append(t)
@@ -158,7 +150,7 @@ class hawkPDF2:
           self.story.append(t)
           self.story.append(Spacer(1,8))
           self.toc.addEntry(1, text, self.page_counter)
-         
+
       def addTable(self,ndata,nkeys=None):
           data = []
           if not nkeys:
@@ -188,7 +180,7 @@ class hawkPDF2:
           t.setStyle(tblStyle)
           self.story.append(t)
           self.story.append(CondPageBreak(6))
-   
+ 
       def addPageBreak(self):
           self.story.append(PageBreak())
           self.page_counter = self.page_counter + 1
@@ -197,55 +189,7 @@ class hawkPDF2:
           self.story.append(Image(image,w,h))
           self.story.append(Spacer(1,12))
 
-    
       def savePDF(self):
           self.addTOC(2)
           self.doc.build(self.story)
           self.story = []
-
-
-if __name__ == '__main__':
-   
-   doc = hawkPDF2("tester.pdf")
-   doc.setTitle("IDS Report")
-   doc.setDates("12-03-2014","12-03-2014")
-   doc.setClient("1936-ADS")
-   doc.setPImage("index.png") 
-   
-
-   dportdata = [{"ip_dport":1,"ip_dport_count":5000},
-                {"ip_dport":5,"ip_dport_count":4999},
-                {"ip_dport":51,"ip_dport_count":4988},
-                {"ip_dport":14,"ip_dport_count":4000},
-                {"ip_dport":22,"ip_dport_count":3000},
-                {"ip_dport":510,"ip_dport_count":500},]
-
-   
-   dportdata2 = [{"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},
-                 {"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},
-                 {"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},
-                 {"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},
-                 {"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},
-                 {"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},]
-
-   doc.setPortrait()
-   doc.addStoryTitle("Top 100")
-   doc.toc.addEntry(1,"Top 100",3)
-   doc.addStory("This is just another test of the emergency broadcast system.  This is only a test")
-   keys = ["ip_dport","ip_dport_count"]
-   doc.addTable(dportdata,nkeys=keys)
-
-   doc.setLandscape()
-   doc.addStoryTitle("Top Landscape")
-   doc.addStory("This is just another test of the emergency broadcast system.  This is only a test")
-   keys = ["ip_dport","ip_dport_count","ip_dport1","ip_dport_count1","ip_dport2","ip_dport_count2"]
-   doc.addTable(dportdata,nkeys=keys)
-
-   doc.setPortrait()
-   doc.addStoryTitle("TTop Portrait test")
-   doc.addStory("This is just another test of the emergency broadcast system.  This is only a test")
-   keys = ["ip_dport","ip_dport_count","ip_dport1","ip_dport_count1","ip_dport2","ip_dport_count2"]
-   doc.addTable(dportdata,nkeys=keys)
-
-   doc.savePDF()
-   
