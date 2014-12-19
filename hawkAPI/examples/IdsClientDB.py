@@ -9,7 +9,7 @@ import argparse
 from pymongo import *
 from bson.son import SON
 
-usage = 'IdsClient -c client -l dir -o -a -b'
+usage = 'IdsClientDB -c client -l dir -o -a -b'
 parser = argparse.ArgumentParser(description="PDF output by client for IDS alerts",epilog=usage)
 parser.add_argument("-l","--dir",help="location to store",type=str,required=True)
 parser.add_argument("-o","--logo",help="path to logo",type=str,required=False)
@@ -22,7 +22,7 @@ if len(sys.argv) < 3:
     sys.exit()
 opt = parser.parse_args()
 
-hawk = hawkcore([None])
+hawk = hawkcore(None)
 graph = hawkGraph()
 client = MongoClient('localhost', 27017)
 db = client["%s" % opt.client]
@@ -37,6 +37,7 @@ for i in end:
     nend = i["date"]
 fend = nend[0:10] + " 23:55:55"
 
+col.create_index([("src",DESCENDING)])
 pipe = [{"$group":{"_id":"$src","count":{"$sum":1}}},
         {"$sort":SON([("count",-1),("_id",-1)])},
         {"$limit":10}]
@@ -153,19 +154,17 @@ for i in srcs:
 alldata = fin
 
 nameit = opt.dir + opt.client + "-ids.pdf"
-doc = hawkPDF(nameit,hawk)
-#doc.setPageLetter()
+doc = hawkPDF(nameit)
 doc.setTitle("IDS Report")
-doc.setDate(str(nstart),str(fend))
-doc.setClientName(opt.client)
+doc.setDates(str(nstart),str(fend))
+doc.setClient(opt.client)
 if opt.logo:
-   doc.setClientImage(opt.logo)
+   doc.setCImage(opt.logo)
 if opt.plogo:
-   doc.setPageImage(opt.plogo)
-doc.addPageBreak()
+   doc.setPImage(opt.plogo)
 
-doc.createToc()
 
+doc.setPortrait()
 doc.addStoryTitle("Top Ten IP Sources")
 doc.addStory("Top ten IP sources outlines the top ten source IP addresses creating alerts.")
 doc.addImage("%s/Top_IP_Source.png" % graph.getDir(),450,200)
@@ -215,6 +214,6 @@ if opt.alerts:
    doc.addTable(alldata,nkeys=keys)
    doc.addPageBreak()
 
-doc.savePdf()
+doc.savePDF()
 graph.removeDir() 
 sys.exit(1)
