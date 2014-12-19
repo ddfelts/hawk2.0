@@ -1,70 +1,124 @@
-import time
-import sys
-from reportlab.platypus import SimpleDocTemplate,LongTable,CondPageBreak,Paragraph, Spacer, PageBreak, Image, Table, TableStyle
-from reportlab.lib.styles import ParagraphStyle as PS
-from reportlab.platypus.tableofcontents import TableOfContents
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.rl_config import defaultPageSize
+from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import Paragraph, Spacer, Image, Frame,Table, TableStyle, NextPageTemplate, PageTemplate, BaseDocTemplate,LongTable,CondPageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import utils
-from reportlab.pdfgen import canvas
-from reportlab.graphics.shapes import Rect, Line
 from reportlab.lib.colors import red, green, black, blue, lightblue
-from reportlab.lib.pagesizes import letter, landscape
-from hawkAPI.lib.core.hawklib import hawklib
+from reportlab.platypus.flowables import Flowable, PageBreak
+from reportlab.lib.styles import ParagraphStyle as PS
+from reportlab.platypus.tableofcontents import TableOfContents
 
 
-class ReportDocument(SimpleDocTemplate):
+class hawkPDF2:
 
-      def __init__(self,pdfName,**kw):
-          apply(SimpleDocTemplate.__init__, (self, pdfName), kw)
-
-      def afterFlowable(self, flowable):  
-         "Registers TOC entries."  
-         if flowable.__class__.__name__ == 'Paragraph':  
-             text = flowable.getPlainText()
-             style =  flowable.style.name
-             if style == "Heading1": 
-                self.notify('TOCEntry', (0, text, self.page))  
-
-class hawkPDF:
-
-      def __init__(self,pdfName,hawk):
-          #self.c = canvas.Canvas(pdfName)
-          self.doc = ""
-          self.docname = pdfName
-          #ReportDocument(pdfName,showBoundary=1)
-          #self.c = canvas.Canvas(pdfName)
-          #self.PAGE_HEIGHT=defaultPageSize[1]
-          #self.PAGE_WIDTH=defaultPageSize[0]
-          self.story = []
+      def __init__(self,doc):
+          self.docname = doc
+          self.page_counter = 2
+          self.w,self.h = letter
+          self.doc = BaseDocTemplate(self.docname,pagesize=letter)
+          self.landscape = Frame(self.doc.leftMargin,
+                                 self.doc.bottomMargin,
+                                 self.doc.height,
+                                 self.doc.width,
+                                 id="Normal")
+          
+          self.portrait = Frame(self.doc.leftMargin,
+                                self.doc.bottomMargin,
+                                self.doc.width,
+                                self.doc.height,
+                                id="Normal")
+          
+          self.tportrait = Frame(self.doc.leftMargin,
+                                self.doc.bottomMargin,
+                                self.doc.width,
+                                self.doc.height,
+                                id="Normal")
+          ttemplate = PageTemplate(id='tportrait',frames =self.tportrait, onPage=self.make_title_page)
+          ptemplate = PageTemplate(id='portrait',frames =self.portrait, onPage=self.make_portrait)
+          ltemplate = PageTemplate(id='landscape',frames =self.landscape, onPage=self.make_landscape)
+          self.doc.addPageTemplates([ttemplate,ptemplate,ltemplate]) 
           self.styles = getSampleStyleSheet()
-          self.Title = ""
-          self.startDate = ""
-          self.endDate = ""
-          self.client = ""
+          self.toc = TableOfContents()
+          self.start = ""
+          self.end = ""
+          self.story = []
+          self.pgType = "Letter"
           self.image = ""
           self.cimage = ""
-          self.hlib = hawklib(hawk)
-          #self.lw,self.lh = letter
-          self.pgtype = "letter"
+          self.client = ""
 
-      def setPageLetter(self):
-             self.pgtype = "letter"
-             self.lw,self.lh = letter
-             self.doc = ReportDocument(self.docname,pagesize=(self.lw,self.lh))
-             
 
-      def setPageLandscape(self):
-             self.pgtype = "landscape"
-             self.lw,self.lh = landscape(letter)
-             self.doc = ReportDocument(self.docname,pagesize=(self.lw,self.lh))
+          self.toc = TableOfContents()
+	  self.toc.levelStyles = [  
+	      PS(fontName='Times-Bold', fontSize=14, name='TOCHeading1', leftIndent=20, firstLineIndent=-20, spaceBefore=10, leading=16),  
+	      PS(fontSize=12, name='TOCHeading2', leftIndent=40, firstLineIndent=-20, spaceBefore=5, leading=12),  
+	  ]  
 
-      def setTitle(self,title):
-          self.Title = title
 
-      def setClientName(self,name):
-          self.client = name
+      def addTOC(self, page):
+	  self.toc.beforeBuild()
+          self.story.insert(page, NextPageTemplate('portrait'))
+	  self.story.insert(page+1, self.toc);
+          self.story.insert(page+2, PageBreak())
+
+      def setCImage(self,image):
+          self.cimage = image
+
+      def setPImage(self,image):
+          self.image = image
+
+      def setTitle(self,text):
+          self.title = text
+
+      def setClient(self,text):
+          self.client = text
+
+      def setDates(self,start,end):
+          self.startDate = start
+          self.endDate = end
+   
+      def setClient(self,text):
+          self.client = text
+
+      def make_portrait(self,canvas,doc):
+          canvas.saveState()
+          canvas.setPageSize(letter)
+          canvas.setFont("Times-Roman",10)
+          canvas.drawString(6.25 * inch, self.h - 25,"Client Name: %s " % (self.client))
+          canvas.line(.50 * inch, self.h - 50, 8 * inch, self.h - 50)
+          canvas.line(.50 * inch,1 * inch, 8 * inch,1 * inch)
+          canvas.drawString(inch, 0.75 * inch, "Page %d" % doc.page)
+          canvas.drawString(inch * 1.5, 0.60 * inch, "Confidential Document.")
+          canvas.restoreState()
+          
+      def make_landscape(self,canvas,doc):
+          canvas.saveState()
+          canvas.setFont("Times-Roman",10)
+          canvas.setPageSize(landscape(letter))
+          canvas.line(.50 * inch, self.w - 50, 10.75 * inch,self.w - 50)
+          canvas.line(.50 * inch,1 * inch, 10.75 * inch,1 * inch)
+          canvas.drawString(inch, 0.75 * inch, "Page %d" % doc.page)
+          canvas.drawString(inch * 2.75, 0.60 * inch, "Confidential Document.")
+          canvas.drawString(9.50 * inch,self.w - 25 ,"Client: %s" % self.client)
+          canvas.restoreState()
+
+      def make_title_page(self,canvas,doc):
+          canvas.saveState()
+          canvas.setFont("Times-Bold",30)
+          canvas.drawString(1 * inch,9 * inch , self.title)
+          canvas.setFont("Times-Bold",16)
+          canvas.drawString(1 * inch,8.5 * inch,"Start (%s) - End (%s)" % (self.startDate,self.endDate))
+          canvas.drawString(1 * inch,8.25 * inch,"Client: %s" % self.client)
+          if self.image != "":
+                aspect = self.get_aspect(self.image)
+                canvas.drawImage(self.image,self.w-150,self.h-80,width=120,height=(120 * aspect))
+          if self.cimage != "":
+                aspect = self.get_aspect(self.cimage)
+                canvas.drawImage(self.cimage,2.0625 * inch,self.h-400,width=self.w/2,height=(self.w/2 * aspect))
+          canvas.restoreState()
+
 
       def get_aspect(self,path):
           img = utils.ImageReader(path)
@@ -72,91 +126,39 @@ class hawkPDF:
           aspect = ih / float(iw)
           return aspect
 
-      def get_im_size(self,path):
-          img = utils.ImageReader(path)
-          return img.getSize()
 
-      def myFirstPage(self,canvas,doc):
-          canvas.saveState()
-          if self.pgtype == "landscape":
-             #self.lw,self.lh = landscape
-             #canvas.setPageSize((self.lw,self.lh))
-             canvas.setFont("Times-Bold",30)
-             canvas.drawString(1 * inch,6 * inch , self.Title)
-             canvas.setFont("Times-Bold",14)
-             canvas.drawString(1 * inch,5.75 * inch,"Start (%s) - End (%s)" % (self.startDate,self.endDate))
-             canvas.drawString(1 * inch,5.55 * inch,"Client: %s" % self.client)
-             if self.image != "":
-                canvas.drawImage(self.image,self.lw/2.0,self.lh-168,width=150,height=50)
-             canvas.restoreState()
-          else:
-             #canvas.setPageSize((self.lw,self.lh))
-             canvas.setFont("Times-Bold",30)
-             canvas.drawString(1 * inch,9 * inch , self.Title)
-             canvas.setFont("Times-Bold",16)
-             canvas.drawString(1 * inch,8.5 * inch,"Start (%s) - End (%s)" % (self.startDate,self.endDate))
-             canvas.drawString(1 * inch,8.25 * inch,"Client: %s" % self.client)
-
-             if self.image != "":
-                aspect = self.get_aspect(self.image)
-                canvas.drawImage(self.image,self.lw-150,self.lh-80,width=120,height=(120 * aspect))
-             if self.cimage != "":
-                aspect = self.get_aspect(self.cimage)
-                canvas.drawImage(self.cimage,2.0625 * inch,self.lh-400,width=self.lw/2,height=(self.lw/2 * aspect))
-             canvas.restoreState()
-
-      def myLaterPage(self,canvas,doc):
-          canvas.saveState()
-          if self.pgtype == "landscape":
-             #self.lw,self.lh = landscape
-             #canvas.setPageSize((self.lw, self.lh))
-             canvas.setFont("Times-Roman",10)
-             canvas.drawString(9.25 * inch, self.lh - 25,"Client Name: %s " % (self.client))
-             canvas.line(.50 * inch, self.lh - 50, 10.75 * inch,self.lh - 50)
-             canvas.line(.50 * inch,1 * inch, 10.75 * inch,1 * inch)
-             canvas.drawString(inch, 0.75 * inch, "Page: %d" % (doc.page))
-             canvas.restoreState()
-          else:
-             #canvas.setPageSize((self.lw,self.lh))
-             canvas.setFont("Times-Roman",10)
-             canvas.drawString(6.25 * inch, self.lh - 25,"Client Name: %s " % (self.client))
-             canvas.line(.50 * inch, self.lh - 50, 8 * inch, self.lh - 50)
-             canvas.line(.50 * inch,1 * inch, 8 * inch,1 * inch)
-             canvas.drawString(inch, 0.75 * inch, "Page: %d" % (doc.page))
-             canvas.restoreState()
-
-      def setDate(self,start,end):
-          self.startDate = start
-          self.endDate = end
-
-      def setPageImage(self,image):
-          self.image = image
-
-      def setClientImage(self,image):
-          self.cimage = image
-
-      def createToc(self):
-          centered = PS(name = 'centered',  
-                        fontSize = 30,  
-                        leading = 16,  
-                        alignment = 1,  
-                        spaceAfter = 20)
-          self.story.append(Paragraph('<b>Table of contents</b>',centered))
-          toc = TableOfContents()
-          self.story.append(toc)
+      def createTemplates(self):
+          ttemplate = PageTemplate(id='tportrait',frames =self.tportrait, onPage=self.make_title_page)
+          ptemplate = PageTemplate(id='portrait',frames =self.portrait, onPage=self.make_portrait)
+          ltemplate = PageTemplate(id='landscape',frames =self.landscape, onPage=self.make_landscape)
+          self.doc.addPageTemplates([ttemplate,ptemplate,ltemplate])
+   
+      def setPortrait(self):
+          self.story.append(NextPageTemplate('portrait'))
           self.addPageBreak()
 
+      def setLandscape(self):
+          self.story.append(NextPageTemplate('landscape'))
+          self.addPageBreak()
+
+      def setDates(self,start,end):
+          self.startDate = start
+          self.endDate = end
+      
+      def setCanvas(self,canvas):
+          self.canvas = canvas  
+                 
       def addStory(self,text):
           t = Paragraph(text,self.styles["Normal"])
           self.story.append(t)
-          self.story.append(Spacer(1,12))
+          self.story.append(Spacer(1,12))       
 
       def addStoryTitle(self,text):
           t = Paragraph(text,self.styles["Heading1"])
           self.story.append(t)
-          self.story.append(Spacer(1,12))
-
-
+          self.story.append(Spacer(1,8))
+          self.toc.addEntry(1, text, self.page_counter)
+         
       def addTable(self,ndata,nkeys=None):
           data = []
           if not nkeys:
@@ -186,15 +188,64 @@ class hawkPDF:
           t.setStyle(tblStyle)
           self.story.append(t)
           self.story.append(CondPageBreak(6))
+   
+      def addPageBreak(self):
+          self.story.append(PageBreak())
+          self.page_counter = self.page_counter + 1
 
       def addImage(self,image,w,h):
           self.story.append(Image(image,w,h))
           self.story.append(Spacer(1,12))
 
-      def addPageBreak(self):
-          self.story.append(PageBreak())
+    
+      def savePDF(self):
+          self.addTOC(2)
+          self.doc.build(self.story)
+          self.story = []
 
-      def savePdf(self):
-          if self.doc == "":
-             self.setPageLetter()
-          self.doc.multiBuild(self.story,onFirstPage=self.myFirstPage, onLaterPages=self.myLaterPage)
+
+if __name__ == '__main__':
+   
+   doc = hawkPDF2("tester.pdf")
+   doc.setTitle("IDS Report")
+   doc.setDates("12-03-2014","12-03-2014")
+   doc.setClient("1936-ADS")
+   doc.setPImage("index.png") 
+   
+
+   dportdata = [{"ip_dport":1,"ip_dport_count":5000},
+                {"ip_dport":5,"ip_dport_count":4999},
+                {"ip_dport":51,"ip_dport_count":4988},
+                {"ip_dport":14,"ip_dport_count":4000},
+                {"ip_dport":22,"ip_dport_count":3000},
+                {"ip_dport":510,"ip_dport_count":500},]
+
+   
+   dportdata2 = [{"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},
+                 {"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},
+                 {"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},
+                 {"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},
+                 {"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},
+                 {"ip_dport":1,"ip_dport_count":5000,"ip_dport1":1,"ip_dport_count1":5000,"ip_dport2":1,"ip_dport_count2":5000},]
+
+   doc.setPortrait()
+   doc.addStoryTitle("Top 100")
+   doc.toc.addEntry(1,"Top 100",3)
+   doc.addStory("This is just another test of the emergency broadcast system.  This is only a test")
+   keys = ["ip_dport","ip_dport_count"]
+   doc.addTable(dportdata,nkeys=keys)
+
+   doc.setLandscape()
+   doc.addStoryTitle("Top Landscape")
+   doc.addStory("This is just another test of the emergency broadcast system.  This is only a test")
+   keys = ["ip_dport","ip_dport_count","ip_dport1","ip_dport_count1","ip_dport2","ip_dport_count2"]
+   doc.addTable(dportdata,nkeys=keys)
+
+   doc.setPortrait()
+   doc.addStoryTitle("TTop Portrait test")
+   doc.addStory("This is just another test of the emergency broadcast system.  This is only a test")
+   keys = ["ip_dport","ip_dport_count","ip_dport1","ip_dport_count1","ip_dport2","ip_dport_count2"]
+   doc.addTable(dportdata,nkeys=keys)
+
+   doc.savePDF()
+   
