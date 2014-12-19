@@ -51,16 +51,16 @@ class hawkPDF:
 
 
           self.toc = TableOfContents()
-	      self.toc.levelStyles = [  
+	  self.toc.levelStyles = [  
 	            PS(fontName='Times-Bold', fontSize=14, name='TOCHeading1', leftIndent=20, firstLineIndent=-20, spaceBefore=10, leading=16),  
 	            PS(fontSize=12, name='TOCHeading2', leftIndent=40, firstLineIndent=-20, spaceBefore=5, leading=12),  
 	            ]  
 
 
       def addTOC(self, page):
-	      self.toc.beforeBuild()
+	  self.toc.beforeBuild()
           self.story.insert(page, NextPageTemplate('portrait'))
-	      self.story.insert(page+1, self.toc);
+	  self.story.insert(page+1, self.toc);
           self.story.insert(page+2, PageBreak())
 
       def setCImage(self,image):
