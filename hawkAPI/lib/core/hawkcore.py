@@ -16,10 +16,13 @@ class hawkcore(object):
          self.allsessions = []
          #self.sess = requests.session()
          self.server = server
-         for i in self.server:
-             data = {"server":i,"sess":requests.session()}
-             self.allsessions.append(data)
-             data = ""
+         if self.server == None:
+            pass
+         else:
+            for i in self.server:
+               data = {"server":i,"sess":requests.session()}
+               self.allsessions.append(data)
+               data = ""
 
          self.debugit = "False"
          self.retry = 0
@@ -104,20 +107,23 @@ class hawkcore(object):
       def doGet(self,data):
          url = "https://%s:8080/API/1.1/%s" % (self.server,data)
          try:
-             r = self.sess.get(url,verify=False,stream=True,allow_redirects=True)
-             if r.status_code == requests.codes.ok:
-                 pass
-             else:
-                 print "Proper code not returned %s" % r.status_code
-                 self.logout()
-                 sys.exit(1)
-             ndata = ""
-             ndata = r.json()
-             if self.debugit == "True":
-                 print ndata
-                 return ndata
-             else:
-                 return ndata
+             i = random.choice(self.allsessions)
+             url = "https://%s:8080/API/1.1/%s" % (i["server"],api)
+             with closing(i["sess"].get(url,verify=False,stream=True,allow_redirects=True)) as r:
+             #r = self.sess.get(url,verify=False,stream=True,allow_redirects=True)
+                 if r.status_code == requests.codes.ok:
+                    pass
+                 else:
+                    print "Proper code not returned %s" % r.status_code
+                    self.logout()
+                    sys.exit(1)
+                 ndata = ""
+                 ndata = r.json()
+                 if self.debugit == "True":
+                    print ndata
+                    return ndata
+                 else:
+                    return ndata
          except requests.exceptions.Timeout:
              self.doGet(data)
          except SocketError as e:
