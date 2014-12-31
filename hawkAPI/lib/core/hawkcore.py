@@ -105,10 +105,10 @@ class hawkcore(object):
 
 
       def doGet(self,data):
-         url = "https://%s:8080/API/1.1/%s" % (self.server,data)
+         #url = "https://%s:8080/API/1.1/%s" % (self.server,data)
          try:
              i = random.choice(self.allsessions)
-             url = "https://%s:8080/API/1.1/%s" % (i["server"],api)
+             url = "https://%s:8080/API/1.1/%s" % (i["server"],data)
              with closing(i["sess"].get(url,verify=False,stream=True,allow_redirects=True)) as r:
              #r = self.sess.get(url,verify=False,stream=True,allow_redirects=True)
                  if r.status_code == requests.codes.ok:
