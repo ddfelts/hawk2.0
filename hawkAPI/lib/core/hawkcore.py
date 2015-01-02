@@ -2,6 +2,8 @@ import requests
 import sys
 import json
 import logging
+#from logging.handlers import SysLogHandler
+import syslog
 import httplib
 import time
 from socket import error as SocketError
@@ -14,15 +16,19 @@ class hawkcore(object):
 
       def __init__(self,server):
          self.allsessions = []
-         #self.sess = requests.session()
          self.server = server
          if self.server == None:
             pass
          else:
-            for i in self.server:
+            if type(self.server) is str:
                data = {"server":i,"sess":requests.session()}
                self.allsessions.append(data)
                data = ""
+            elif type(self.server) is list:
+                for i in self.server:
+                    data = {"server":i,"sess":requests.session()}
+                    self.allsessions.append(data)
+                    data = ""
 
          self.debugit = "False"
          self.retry = 0
@@ -41,20 +47,27 @@ class hawkcore(object):
       def setRetry(self,retry):
           self.setretry = retry
 
-      def logit(self,level,message,fout=None):
-          logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s',level=logging.DEBUG)
-          if fout != None:
-             logging.basicConfig(filename=fout,level=logging.DEBUG)
+      def logit(self,level,message):
+          print >>sys.stderr,message
+          logger = logging.getLogger()
+          #syslog = SysLogHandler(address=("localhost",514))
+          #logger.addHandler(syslog)
+          logging.basicConfig(filename="hawkreport.log",format='%(asctime)s %(levelname)s:%(message)s',level=logging.DEBUG)
           if level == "DEBUG":
-             logging.debug(message)
+             #syslog.syslog(syslog.LOG_DEBUG,message)
+             logger.debug(message)
      	  if level == "INFO":
-	         logging.info(message)
+             #syslog.syslog(syslog.LOG_INFO,message)
+	         logger.info(message)
           if level == "WARNING":
-             logging.warning(message)
+             #syslog.syslog(syslog.LOG_WARNNING,message)
+             logger.warning(message)
           if level == "ERROR":
-             logging.error(message)
+             logger.error(message)
+             #syslog.syslog(syslog.LOG_ERR,message)
           if level == "CRITICAL":
-             logging.critical(message)
+             logger.critical(message)
+             #syslog.syslog(syslog.LOG_CRIT,message)
 
       def debug(self,level=1):
          httplib.HTTPConnection.debuglevel = level 
@@ -73,11 +86,11 @@ class hawkcore(object):
                   url = "https://%s:8080/API/1.1/login" % i["server"]
                   i["sess"].post(url,data,verify=False,allow_redirects=True)
          except requests.exceptions.ConnectionError:
-              print "Connection Error during login"
-              sys.exit(1)
+             self.logit("ERROR","HAWK: Connection error during login")
+             sys.exit(1)
          except requests.exceptions.Timeout:
-              print "Timeout during login"
-              sys.exit(1)    
+             self.logit("ERROR","HAWK: Timeout during login")
+             sys.exit(1)    
 
       def logout(self):
           for i in self.allsessions:
@@ -95,7 +108,7 @@ class hawkcore(object):
                  return data["results"]
               if data["status"] == "failure":
                   if data["details"] == "Invalid session, unable to continue.":
-                     print 'Hawk Failure: geting new session'
+                     self.logit("ERROR",'HAWK: Geting new session')
                      self.debug()
                      self.reSession()
                      self.login(self.user,self.passw)
@@ -110,11 +123,10 @@ class hawkcore(object):
              i = random.choice(self.allsessions)
              url = "https://%s:8080/API/1.1/%s" % (i["server"],data)
              with closing(i["sess"].get(url,verify=False,stream=True,allow_redirects=True)) as r:
-             #r = self.sess.get(url,verify=False,stream=True,allow_redirects=True)
                  if r.status_code == requests.codes.ok:
                     pass
                  else:
-                    print "Proper code not returned %s" % r.status_code
+                    self.logit("CRITICAL","HAWK: Proper code not returned %s" % r.status_code)
                     self.logout()
                     sys.exit(1)
                  ndata = ""
@@ -142,7 +154,7 @@ class hawkcore(object):
                  self.retry += 1
                  self.doPost(api,data)
           else:
-              print "Failed %s retrys" % str(self.retry)
+              self.logit("CRITICAL","HAWK: Failed %s retrys" % str(self.retry))
               sys.exit(1)
  
       def newdata(self,data):
@@ -152,7 +164,6 @@ class hawkcore(object):
           return self.nd
 
       def doTest(self,api,data={}):
-         #url = "https://%s:8080/API/1.1/%s" % (self.server,api)
          try:
              i = random.choice(self.allsessions)
              url = "https://%s:8080/API/1.1/%s" % (i["server"],api)
@@ -160,16 +171,17 @@ class hawkcore(object):
                if r.status_code == requests.codes.ok:
                    pass
                else:
-                   print "Proper code not returned %s doing retry" % r.status_code
+                   self.logit("ERROR","HAWK: Proper code not returned %s doing retry" % r.status_code)
                    return 0
                data ="" 
                if self.debugit == "True":
-                   print r.text
+                   print >>sys.stderr, "Content:", r.text
                for i in r.iter_content(chunk_size=1046):
                    data += i
                try:
                   ndata = json.loads(data)
                except requests.exceptions.RequestException as e:
+                  self.logit("CRITICAL","HAWK: Unable to parse JSON: %s" % e) 
                   return 0
                #ndata = r.json()
                if len(ndata) > 1:
@@ -181,9 +193,11 @@ class hawkcore(object):
                else:
                    return 0
          except requests.exceptions.Timeout:
-                self.doTest(api,data)
+             self.logit("WARNING","HAWK: Timeout Reached")
+             self.doTest(api,data)
          except SocketError as e:
                 if e.errno == errno.ECONNRESET:
+                   self.logit("WARNING","HAWK: connection reset") 
                    self.doTest(data)
 
       def getDevices(self,data={}):
