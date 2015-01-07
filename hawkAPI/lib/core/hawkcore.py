@@ -21,7 +21,7 @@ class hawkcore(object):
             pass
          else:
             if type(self.server) is str:
-               data = {"server":i,"sess":requests.session()}
+               data = {"server":self.server,"sess":requests.session()}
                self.allsessions.append(data)
                data = ""
             elif type(self.server) is list:
@@ -50,24 +50,17 @@ class hawkcore(object):
       def logit(self,level,message):
           print >>sys.stderr,message
           logger = logging.getLogger()
-          #syslog = SysLogHandler(address=("localhost",514))
-          #logger.addHandler(syslog)
           logging.basicConfig(filename="hawkreport.log",format='%(asctime)s %(levelname)s:%(message)s',level=logging.DEBUG)
           if level == "DEBUG":
-             #syslog.syslog(syslog.LOG_DEBUG,message)
              logger.debug(message)
      	  if level == "INFO":
-             #syslog.syslog(syslog.LOG_INFO,message)
 	         logger.info(message)
           if level == "WARNING":
-             #syslog.syslog(syslog.LOG_WARNNING,message)
              logger.warning(message)
           if level == "ERROR":
              logger.error(message)
-             #syslog.syslog(syslog.LOG_ERR,message)
           if level == "CRITICAL":
              logger.critical(message)
-             #syslog.syslog(syslog.LOG_CRIT,message)
 
       def debug(self,level=1):
          httplib.HTTPConnection.debuglevel = level 
@@ -109,7 +102,6 @@ class hawkcore(object):
               if data["status"] == "failure":
                   if data["details"] == "Invalid session, unable to continue.":
                      self.logit("ERROR",'HAWK: Geting new session')
-                     self.debug()
                      self.reSession()
                      self.login(self.user,self.passw)
                   return 0
@@ -118,7 +110,6 @@ class hawkcore(object):
 
 
       def doGet(self,data):
-         #url = "https://%s:8080/API/1.1/%s" % (self.server,data)
          try:
              i = random.choice(self.allsessions)
              url = "https://%s:8080/API/1.1/%s" % (i["server"],data)
@@ -140,6 +131,8 @@ class hawkcore(object):
              self.doGet(data)
          except SocketError as e:
              if e.errno == errno.ECONNRESET:
+                 self.logit("WARNING","Hawk: Connection Reset Retrying Get")
+                 self.reSession()
                  self.doGet(data)
 
 
@@ -198,6 +191,7 @@ class hawkcore(object):
          except SocketError as e:
                 if e.errno == errno.ECONNRESET:
                    self.logit("WARNING","HAWK: connection reset") 
+                   self.reSession()
                    self.doTest(data)
 
       def getDevices(self,data={}):
