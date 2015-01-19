@@ -187,12 +187,14 @@ class hawkcore(object):
                    return 0
          except requests.exceptions.Timeout:
              self.logit("WARNING","HAWK: Timeout Reached")
-             self.doTest(api,data)
+             return "TIMEOUT"
+             #self.doTest(api,data)
          except SocketError as e:
                 if e.errno == errno.ECONNRESET:
                    self.logit("WARNING","HAWK: connection reset") 
-                   self.reSession()
-                   self.doTest(data)
+                   return "RESET"
+                   #self.reSession()
+                   #self.doTest(data)
 
       def getDevices(self,data={}):
          url = "search/resource" 
