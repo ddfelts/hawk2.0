@@ -15,7 +15,11 @@ You will need to install <a href="https://xlsxwriter.readthedocs.org">Xlsxwriter
 
 You will need to install <a href="http://www.reportlab.com/">ReportLab</a>
 
-    $sudo apt-get install python-reportlab
+    $sudo apt-get install python-reportlab 
+
+You will need to install these dependencies:
+
+    $sudo apt-get install libffi-dev libffi6 mongodb python-pymongo
 
 You will need to install <a href="http://pygal.org/">PyGal</a> and lxml for graphics
 
