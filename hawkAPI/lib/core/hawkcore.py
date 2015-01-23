@@ -10,8 +10,7 @@ import errno
 from contextlib import closing
 import re
 import random
-import urllib3
-
+from requests.packages import urllib3
 urllib3.disable_warnings()
 
 class hawkcore(object):
