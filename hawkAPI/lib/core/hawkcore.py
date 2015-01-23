@@ -2,7 +2,6 @@ import requests
 import sys
 import json
 import logging
-#from logging.handlers import SysLogHandler
 import syslog
 import httplib
 import time
@@ -11,6 +10,9 @@ import errno
 from contextlib import closing
 import re
 import random
+import urllib3
+
+urllib3.disable_warnings()
 
 class hawkcore(object):
 
@@ -36,6 +38,7 @@ class hawkcore(object):
          self.nd = []
          logging.getLogger("requests").setLevel(logging.CRITICAL)
          logging.getLogger("urllib3").setLevel(logging.CRITICAL)
+         self.dataRetry = []
 
       def reSession(self):
           self.sess = requests.session()
@@ -54,7 +57,7 @@ class hawkcore(object):
           if level == "DEBUG":
              logger.debug(message)
      	  if level == "INFO":
-	         logger.info(message)
+             logger.info(message)
           if level == "WARNING":
              logger.warning(message)
           if level == "ERROR":
@@ -113,7 +116,7 @@ class hawkcore(object):
          try:
              i = random.choice(self.allsessions)
              url = "https://%s:8080/API/1.1/%s" % (i["server"],data)
-             with closing(i["sess"].get(url,verify=False,stream=True,allow_redirects=True)) as r:
+             with closing(i["sess"].get(url,verify=False,allow_redirects=True)) as r:
                  if r.status_code == requests.codes.ok:
                     pass
                  else:
@@ -160,7 +163,7 @@ class hawkcore(object):
          try:
              i = random.choice(self.allsessions)
              url = "https://%s:8080/API/1.1/%s" % (i["server"],api)
-             with closing(i["sess"].post(url,data,verify=False,stream=True,allow_redirects=True)) as r:
+             with closing(i["sess"].post(url,data,verify=False,allow_redirects=True)) as r:
                if r.status_code == requests.codes.ok:
                    pass
                else:
@@ -174,9 +177,11 @@ class hawkcore(object):
                try:
                   ndata = json.loads(data)
                except requests.exceptions.RequestException as e:
-                  self.logit("CRITICAL","HAWK: Unable to parse JSON: %s" % e) 
+                  self.logit("CRITICAL","HAWK: Unable to parse JSON: %s" % e)
                   return 0
-               #ndata = r.json()
+               except ValueError as e:
+                  self.logit("CRITICAL","HAWK: Unable to parse JSON: %s" % e)
+                  return 0
                if len(ndata) > 1:
                   if self.debugit == "True":
                      print ndata
@@ -187,15 +192,12 @@ class hawkcore(object):
                    return 0
          except requests.exceptions.Timeout:
              self.logit("WARNING","HAWK: Timeout Reached")
-             return "TIMEOUT"
-             #self.doTest(api,data)
+             return 0          
          except SocketError as e:
                 if e.errno == errno.ECONNRESET:
-                   self.logit("WARNING","HAWK: connection reset") 
-                   return "RESET"
-                   #self.reSession()
-                   #self.doTest(data)
-
+                   self.logit("WARNING","HAWK: connection reset")
+                   return 0 
+                   
       def getDevices(self,data={}):
          url = "search/resource" 
          ndata = self.doPost(url,data)
@@ -215,7 +217,6 @@ class hawkcore(object):
           url = "shards/list"
           data = self.doGet(url)
           return self.checkData(data)         
-
 
       def traverse(self,o):
           res = []
